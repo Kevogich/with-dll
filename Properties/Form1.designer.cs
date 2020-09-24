@@ -1297,6 +1297,7 @@
             this.textBox11.Name = "textBox11";
             this.textBox11.Size = new System.Drawing.Size(264, 20);
             this.textBox11.TabIndex = 4;
+            this.textBox11.TextChanged += new System.EventHandler(this.textBox11_TextChanged);
             // 
             // label36
             // 
@@ -2459,9 +2460,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.ClientSize = new System.Drawing.Size(1061, 461);
-            this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox10);
             this.Controls.Add(this.groupBox5);
+            this.Controls.Add(this.groupBox9);
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";

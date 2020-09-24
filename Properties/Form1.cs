@@ -210,11 +210,140 @@ namespace GetResultFormulas
         {
             
             Cursor.Current = Cursors.WaitCursor;
-            
-            Fluid Water = new Fluid(FluidList.Water);
 
-            Water.UpdatePT(Pressure.FromBars(1.013), Temperature.FromDegreesCelsius(250));
-            MessageBox.Show("Density of water at 13°C: " + Water.Density);
+            Fluid fluid;
+
+
+            if (cmbFluid.SelectedItem.ToString() == "AMMONIA")
+            {
+                fluid = new Fluid(FluidList.Ammonia);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "OXYGEN")
+            {
+                fluid = new Fluid(FluidList.Oxygen);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "DOWTHERM-A")
+            {
+                fluid = new Fluid(FluidList.InCompDowthermJ);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "METHANOL")
+            {
+                fluid = new Fluid(FluidList.Methanol);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "BENZENE")
+            {
+                fluid = new Fluid(FluidList.Benzene);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "BUTANE")
+            {
+                fluid = new Fluid(FluidList.IsoButane);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "ETHANE")
+            {
+                fluid = new Fluid(FluidList.Ethane);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "FLOURINE")
+            {
+                fluid = new Fluid(FluidList.Fluorine);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "GLYCOL")
+            {
+                fluid = new Fluid(FluidList.MixEthyleneGlycolAQ);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "HYDROGEN SULPHIDE")
+            {
+                fluid = new Fluid(FluidList.HydrogenSulfide);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "ISOBUTANE")
+            {
+                fluid = new Fluid(FluidList.IsoButane);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "ISOBUTYLENE")
+            {
+                fluid = new Fluid(FluidList.IsoButene);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "PROPYLENE")
+            {
+                fluid = new Fluid(FluidList.Propylene);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "HYDROGEN")
+            {
+                fluid = new Fluid(FluidList.Hydrogen);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "CARBON DIOXIDE")
+            {
+                fluid = new Fluid(FluidList.CO2);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "METHANE")
+            {
+                fluid = new Fluid(FluidList.Methane);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "NATURAL GAS")
+            {
+                fluid = new Fluid(FluidList.Methane);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "AIR")
+            {
+                fluid = new Fluid(FluidList.Air);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "ARGON")
+            {
+                fluid = new Fluid(FluidList.Argon);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "BUTANE")
+            {
+                fluid = new Fluid(FluidList.nButane);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "CARBON MONOXIDE")
+            {
+                fluid = new Fluid(FluidList.CO);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "HELIUM")
+            {
+                fluid = new Fluid(FluidList.Helium);
+            }
+
+            else if (cmbFluid.SelectedItem.ToString() == "Neon")
+            {
+                fluid = new Fluid(FluidList.Neon);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "NITROGEN")
+            {
+                fluid = new Fluid(FluidList.Nitrogen);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "Nitrogen (Nitric) Oxide")
+            {
+                fluid = new Fluid(FluidList.NitrousOxide);
+            }
+            
+
+            else if (cmbFluid.SelectedItem.ToString() == "PROPANE")
+            {
+                fluid = new Fluid(FluidList.nPropane);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "PROPYLENE")
+            {
+                fluid = new Fluid(FluidList.Propylene);
+            }
+            else if (cmbFluid.SelectedItem.ToString() == "Sulphur Dioxide")
+            {
+                fluid = new Fluid(FluidList.SulfurDioxide);
+            }
+
+            else if (cmbFluid.SelectedItem.ToString() == "WATER"|| cmbFluid.SelectedItem.ToString() == "STEAM Saturated"|| cmbFluid.SelectedItem.ToString() == "STEAM Superheated")
+            {
+                fluid = new Fluid(FluidList.Water);
+            }
+
+
+            else
+            {
+                fluid = new Fluid(FluidList.Ethane);
+            }
+
+
+            fluid.UpdatePT(Pressure.FromBars(int.Parse(txtIPMaxF.Text)), Temperature.FromDegreesCelsius(250));
+            MessageBox.Show("Density of " +cmbFluid.SelectedItem.ToString()  + fluid.Density +" "+ fluid.Viscosity);
 
             //Console.WriteLine("Density of water at 13°C: " + Water.Density);
 
@@ -1063,6 +1192,9 @@ namespace GetResultFormulas
             }
             return "#";
         }
+
+
+    
 
         private void groupBox11_Enter(object sender, EventArgs e)
         {
@@ -2477,46 +2609,72 @@ namespace GetResultFormulas
                 case "PN25":
                     comboBox24.Items.Clear();
                     comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                    comboBox24.Items.Add("ASME B16.5-150 RF");
+                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                    
                     break;
-                case "CL150":
+                case "#150":
                     comboBox24.Items.Clear();
                     comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                    comboBox24.Items.Add("ASME B16.5-150 RF");
 
                     break;
                 case "PN40":
                     comboBox24.Items.Clear();
                     comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                    comboBox24.Items.Add("ASME B16.5-150 RF");
                     comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
 
                     break;
                 case "PN63":
                     comboBox24.Items.Clear();
                     comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                    comboBox24.Items.Add("ASME B16.5-150 RF");
                     comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
-                    comboBox24.Items.Add("");
+                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+                    comboBox24.Items.Add("ASME B16.5-300 RF");
 
                     break;
                 case "PN100":
                     comboBox24.Items.Clear();
                     comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                    comboBox24.Items.Add("ASME B16.5-150 RF");
                     comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
-                    comboBox24.Items.Add("");
-                    comboBox24.Items.Add("");
+                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+                    comboBox24.Items.Add("ASME B16.5-300 RF");
+                    comboBox24.Items.Add("EN 10226 BSPT");
+                    comboBox24.Items.Add("ASME B1.20.1 NPT");
+                    comboBox24.Items.Add("SW ASME B16.11");
+                    comboBox24.Items.Add("BW ASME B16.25");
 
                     break;
-                case "CL300":
+                case "#300":
                     comboBox24.Items.Clear();
                     comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                    comboBox24.Items.Add("ASME B16.5-150 RF");
+                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+                    comboBox24.Items.Add("ASME B16.5-300 RF");
                     break;
-                case "CL600":
+                case "#600":
                     comboBox24.Items.Clear();
                     comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                    comboBox24.Items.Add("ASME B16.5-150 RF");
+                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+                    comboBox24.Items.Add("ASME B16.5-300 RF");
+                    comboBox24.Items.Add("EN 10226 BSPT");
+                    comboBox24.Items.Add("ASME B1.20.1 NPT");
+                    comboBox24.Items.Add("SW ASME B16.11");
+                    comboBox24.Items.Add("BW ASME B16.25");
                     break;
 
 
 
 
             }
+            comboBox24.SelectedIndex = 0;
         }
 
         private void txtAPSMaxF_TextChanged(object sender, EventArgs e)
@@ -2565,6 +2723,8 @@ namespace GetResultFormulas
                 txtAPSMinF.Text = (Variables.soundMin - 15).ToString();
                 textBox14.Text = (Variables.sigma + 0.2).ToString();
 
+
+
             }
             else if (cmbTType.SelectedIndex == 2)
             {
@@ -2580,7 +2740,41 @@ namespace GetResultFormulas
                 txtAPSMinF.Text = (Variables.soundMin).ToString();
                 textBox14.Text = Variables.sigma.ToString();
 
+
             }
+            if (cmbTType.SelectedItem.ToString() == "Standard Parabolic")
+            {
+                comboBox19.Items.Clear();
+                comboBox19.Items.Add("316L SS");
+            }
+            else if (cmbTType.SelectedItem.ToString() == "Anticav 1")
+            {
+                comboBox19.Items.Clear();
+                comboBox19.Items.Add("316L SS + Stellite");
+            }
+            else if (cmbTType.SelectedItem.ToString() == "Anticav 2")
+            {
+                comboBox19.Items.Clear();
+                comboBox19.Items.Add("316L SS + Stellite");
+            }
+            else if (cmbTType.SelectedItem.ToString() == "low noise 1")
+            {
+                comboBox19.Items.Clear();
+                comboBox19.Items.Add("316L SS + Stellite");
+            }
+            else if (cmbTType.SelectedItem.ToString() == "Low noise 2")
+            {
+                comboBox19.Items.Clear();
+                comboBox19.Items.Add("316L SS + Stellite");
+            }
+            else
+            {
+                comboBox19.Items.Clear();
+                comboBox19.Items.Add("316L SS + Stellite");
+            }
+            comboBox19.SelectedIndex = 0;
+
+
         }
 
 
@@ -2772,18 +2966,23 @@ namespace GetResultFormulas
 
         private void comboBox19_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBox19.SelectedIndex==0)
+            if (comboBox19.SelectedItem.ToString() == "316L SS")
             {
-                comboBox20.SelectedIndex = 0;
+                comboBox20.Items.Clear();
+                comboBox20.Items.Add("Metal Class IV");
             }
-            else if (comboBox19.SelectedIndex == 1)
+            else if (comboBox19.SelectedItem.ToString() == "316L SS + Stellite")
             {
-                comboBox20.SelectedIndex = 1;
+                comboBox20.Items.Clear();
+                comboBox20.Items.Add("Metal-Hardened Class V");
             }
             else
             {
-                comboBox20.SelectedIndex = 2;
+                    comboBox20.Items.Clear();
+                    comboBox20.Items.Add("Soft Class VI");
             }
+            comboBox20.SelectedIndex = 0;
+
         }
         private void txtITMaxF_TextChanged(object sender, EventArgs e)
         {
@@ -2808,6 +3007,7 @@ namespace GetResultFormulas
             {
                 textBox11.Text = ("Incipient cavitation");
                 textBox11.BackColor = Color.Yellow;
+                
 
 
             }
@@ -2816,15 +3016,19 @@ namespace GetResultFormulas
                 textBox11.Text = ("Medium cavitation");
                 textBox11.BackColor = Color.Orange;
             }
+
             else if (double.Parse(textBox14.Text) > 1.0 && double.Parse(textBox14.Text) <= 1.3)
             {
                 textBox11.Text = ("Full cavitation");
                 textBox11.BackColor = Color.Red;
+               
             }
             else
             {
                 textBox11.Text = ("No cavitation");
                 textBox11.BackColor = Color.Green;
+                
+
             }
            
         }
@@ -2985,9 +3189,15 @@ namespace GetResultFormulas
             comboBox21.SelectedIndex = 0;
 
         }
+     
 
         private void comboBox24_SelectedIndexChanged(object sender, EventArgs e)
         {
+        }
+
+        private void textBox11_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 
