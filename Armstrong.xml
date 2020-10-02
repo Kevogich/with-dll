@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <item>
-  <version>0.0.0.0</version>
-  <url>http://rbsoft.org/downloads/AutoUpdaterTest.zip</url>
+    <version>50.0.0.0</version>
+    <url>https://github.com/Kevogich/with-dll/blob/master/AID2.exe?raw=true</url>
 
-  <changelog>https://github.com/ravibpatel/AutoUpdater.NET/releases</changelog>
-  <mandatory>false</mandatory>
+    <changelog>https://github.com/ravibpatel/AutoUpdater.NET/releases</changelog>
+    <mandatory>false</mandatory>
 </item>

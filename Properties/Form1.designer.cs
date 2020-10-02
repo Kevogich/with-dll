@@ -2486,6 +2486,7 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1061, 26);
             this.panel1.TabIndex = 30;
+            this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
             // 
             // button10
             // 
@@ -2498,6 +2499,7 @@
             this.button10.Size = new System.Drawing.Size(22, 20);
             this.button10.TabIndex = 0;
             this.button10.UseVisualStyleBackColor = false;
+            this.button10.Click += new System.EventHandler(this.button10_Click);
             // 
             // Form1
             // 
