@@ -155,6 +155,7 @@
             this.label50 = new System.Windows.Forms.Label();
             this.txtLPD = new System.Windows.Forms.TextBox();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.comboBox25 = new System.Windows.Forms.ComboBox();
             this.comboBox24 = new System.Windows.Forms.ComboBox();
             this.comboBox12 = new System.Windows.Forms.ComboBox();
             this.comboBox8 = new System.Windows.Forms.ComboBox();
@@ -232,6 +233,8 @@
             this.button9 = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.button10 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -256,6 +259,7 @@
             this.groupBox20.SuspendLayout();
             this.groupBox5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmbFluid
@@ -792,9 +796,9 @@
             this.groupBox9.Controls.Add(this.label2);
             this.groupBox9.Controls.Add(this.label1);
             this.groupBox9.Controls.Add(this.cmbFluid);
-            this.groupBox9.Location = new System.Drawing.Point(4, 21);
+            this.groupBox9.Location = new System.Drawing.Point(4, 26);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(1062, 458);
+            this.groupBox9.Size = new System.Drawing.Size(1062, 453);
             this.groupBox9.TabIndex = 8;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "SERVICE CONDITIONS";
@@ -910,9 +914,10 @@
             // 
             this.pictureBox1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(452, 305);
+            this.pictureBox1.Location = new System.Drawing.Point(452, 314);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(159, 132);
+            this.pictureBox1.Size = new System.Drawing.Size(159, 123);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 17;
             this.pictureBox1.TabStop = false;
             // 
@@ -956,9 +961,9 @@
             this.groupBox10.Controls.Add(this.groupBox8);
             this.groupBox10.Controls.Add(this.label47);
             this.groupBox10.Controls.Add(this.pictureBox2);
-            this.groupBox10.Location = new System.Drawing.Point(4, 21);
+            this.groupBox10.Location = new System.Drawing.Point(4, 26);
             this.groupBox10.Name = "groupBox10";
-            this.groupBox10.Size = new System.Drawing.Size(1062, 458);
+            this.groupBox10.Size = new System.Drawing.Size(1062, 453);
             this.groupBox10.TabIndex = 9;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "Result";
@@ -1101,6 +1106,7 @@
             // 
             // comboBox20
             // 
+            this.comboBox20.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox20.FormattingEnabled = true;
             this.comboBox20.Items.AddRange(new object[] {
             "Metal Class IV",
@@ -1113,6 +1119,7 @@
             // 
             // comboBox19
             // 
+            this.comboBox19.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox19.FormattingEnabled = true;
             this.comboBox19.Items.AddRange(new object[] {
             "316L SS",
@@ -1181,27 +1188,27 @@
             this.label30.AutoSize = true;
             this.label30.Location = new System.Drawing.Point(13, 135);
             this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(75, 13);
+            this.label30.Size = new System.Drawing.Size(71, 13);
             this.label30.TabIndex = 4;
-            this.label30.Text = "Characteristic*";
+            this.label30.Text = "Characteristic";
             // 
             // label31
             // 
             this.label31.AutoSize = true;
             this.label31.Location = new System.Drawing.Point(13, 42);
             this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(106, 13);
+            this.label31.Size = new System.Drawing.Size(100, 13);
             this.label31.TabIndex = 4;
-            this.label31.Text = "Seat bore / Diameter";
+            this.label31.Text = "Seat bore/Diameter";
             // 
             // label32
             // 
             this.label32.AutoSize = true;
             this.label32.Location = new System.Drawing.Point(13, 19);
             this.label32.Name = "label32";
-            this.label32.Size = new System.Drawing.Size(35, 13);
+            this.label32.Size = new System.Drawing.Size(31, 13);
             this.label32.TabIndex = 4;
-            this.label32.Text = "Type*";
+            this.label32.Text = "Type";
             // 
             // groupBox11
             // 
@@ -1594,6 +1601,7 @@
             // groupBox6
             // 
             this.groupBox6.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.groupBox6.Controls.Add(this.comboBox25);
             this.groupBox6.Controls.Add(this.comboBox24);
             this.groupBox6.Controls.Add(this.comboBox12);
             this.groupBox6.Controls.Add(this.comboBox8);
@@ -1616,8 +1624,18 @@
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "VALVE BODY / BONNET";
             // 
+            // comboBox25
+            // 
+            this.comboBox25.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox25.FormattingEnabled = true;
+            this.comboBox25.Location = new System.Drawing.Point(107, 100);
+            this.comboBox25.Name = "comboBox25";
+            this.comboBox25.Size = new System.Drawing.Size(125, 21);
+            this.comboBox25.TabIndex = 25;
+            // 
             // comboBox24
             // 
+            this.comboBox24.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox24.FormattingEnabled = true;
             this.comboBox24.Items.AddRange(new object[] {
             "FLG EN1092-1 PN16 B1",
@@ -1710,7 +1728,7 @@
             // 
             // textBox7
             // 
-            this.textBox7.Location = new System.Drawing.Point(107, 100);
+            this.textBox7.Location = new System.Drawing.Point(107, 101);
             this.textBox7.Name = "textBox7";
             this.textBox7.ReadOnly = true;
             this.textBox7.Size = new System.Drawing.Size(125, 20);
@@ -1739,9 +1757,9 @@
             this.label25.AutoSize = true;
             this.label25.Location = new System.Drawing.Point(1, 107);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(75, 13);
+            this.label25.Size = new System.Drawing.Size(71, 13);
             this.label25.TabIndex = 4;
-            this.label25.Text = "Body Material*";
+            this.label25.Text = "Body Material";
             // 
             // cmbVBFD
             // 
@@ -1757,9 +1775,9 @@
             this.label24.AutoSize = true;
             this.label24.Location = new System.Drawing.Point(1, 78);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(78, 13);
+            this.label24.Size = new System.Drawing.Size(74, 13);
             this.label24.TabIndex = 4;
-            this.label24.Text = "Flow Direction*";
+            this.label24.Text = "Flow Direction";
             // 
             // label23
             // 
@@ -1836,9 +1854,10 @@
             // 
             this.pictureBox2.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(452, 305);
+            this.pictureBox2.Location = new System.Drawing.Point(452, 314);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(159, 132);
+            this.pictureBox2.Size = new System.Drawing.Size(159, 123);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox2.TabIndex = 16;
             this.pictureBox2.TabStop = false;
             // 
@@ -2075,6 +2094,7 @@
             this.checkedListBox1.TabIndex = 0;
             this.checkedListBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.checkedListBox1_MouseClick);
             this.checkedListBox1.SelectedIndexChanged += new System.EventHandler(this.checkedListBox1_SelectedIndexChanged);
+            this.checkedListBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.checkedListBox1_MouseMove);
             // 
             // richTextBox2
             // 
@@ -2419,6 +2439,7 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.groupBox5.Controls.Add(this.button9);
             this.groupBox5.Controls.Add(this.button8);
             this.groupBox5.Controls.Add(this.label69);
@@ -2436,9 +2457,9 @@
             this.groupBox5.Controls.Add(this.button6);
             this.groupBox5.Controls.Add(this.groupBox18);
             this.groupBox5.Controls.Add(this.pictureBox3);
-            this.groupBox5.Location = new System.Drawing.Point(4, 21);
+            this.groupBox5.Location = new System.Drawing.Point(4, 26);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(1062, 458);
+            this.groupBox5.Size = new System.Drawing.Size(1062, 453);
             this.groupBox5.TabIndex = 11;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Actuator";
@@ -2447,12 +2468,36 @@
             // pictureBox3
             // 
             this.pictureBox3.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.pictureBox3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
-            this.pictureBox3.Location = new System.Drawing.Point(452, 305);
+            this.pictureBox3.Location = new System.Drawing.Point(452, 314);
             this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(159, 132);
+            this.pictureBox3.Size = new System.Drawing.Size(159, 123);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox3.TabIndex = 18;
             this.pictureBox3.TabStop = false;
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.SystemColors.Menu;
+            this.panel1.Controls.Add(this.button10);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1061, 26);
+            this.panel1.TabIndex = 30;
+            // 
+            // button10
+            // 
+            this.button10.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.button10.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button10.BackgroundImage")));
+            this.button10.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button10.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button10.Location = new System.Drawing.Point(1039, 0);
+            this.button10.Name = "button10";
+            this.button10.Size = new System.Drawing.Size(22, 20);
+            this.button10.TabIndex = 0;
+            this.button10.UseVisualStyleBackColor = false;
             // 
             // Form1
             // 
@@ -2460,9 +2505,11 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.ClientSize = new System.Drawing.Size(1061, 461);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox10);
             this.Controls.Add(this.groupBox5);
-            this.Controls.Add(this.groupBox9);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
@@ -2511,6 +2558,7 @@
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2720,6 +2768,9 @@
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.ComboBox comboBox24;
         private System.Windows.Forms.Label label73;
+        private System.Windows.Forms.ComboBox comboBox25;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Button button10;
     }
 }
 

@@ -341,9 +341,17 @@ namespace GetResultFormulas
                 fluid = new Fluid(FluidList.Ethane);
             }
 
+            if (cmbState.SelectedIndex==3)
+            {
+                fluid.UpdatePT(Pressure.FromBars(int.Parse(txtIPMaxF.Text)), Temperature.FromDegreesCelsius(int.Parse(txtITSMaxF.Text)));
+            }
+            else
+            {
+                fluid.UpdatePT(Pressure.FromBars(int.Parse(txtIPMaxF.Text)), Temperature.FromDegreesCelsius(int.Parse(txtITMaxF.Text)));
+            }
 
-            fluid.UpdatePT(Pressure.FromBars(int.Parse(txtIPMaxF.Text)), Temperature.FromDegreesCelsius(250));
-            MessageBox.Show("Density of " +cmbFluid.SelectedItem.ToString()  + fluid.Density +" "+ fluid.Viscosity);
+            
+            _ = MessageBox.Show("Density of " + cmbFluid.SelectedItem.ToString() + fluid.Density + " " + fluid.Viscosity + " " + fluid.Tsat);
 
             //Console.WriteLine("Density of water at 13°C: " + Water.Density);
 
@@ -358,7 +366,7 @@ namespace GetResultFormulas
             //txtSWMWNF.Text = "";
             //txtVSHRNF.Text = "";
             //txtIPNF.Text = "";
-            //txtRFCMaxF.Text = "";
+            txtRFCMaxF.Text = "";
             //txtRFCNF.Text = "";
             //txtRFCMinF.Text = "";
             //txtVVNF.Text = "";
@@ -389,7 +397,7 @@ namespace GetResultFormulas
             _Excel.Range rangebonnet;
             _Excel.Range rangepacking;
             _Excel.Range rangeseat;
-            //_Excel.Range pneumatic;
+            _Excel.Range rangematerial;
             //_Excel.Range electric;
             //_Excel.Range balancing;
 
@@ -455,6 +463,9 @@ namespace GetResultFormulas
                 Range row30 = worksheet.Rows.Cells[47, 8];
                 row30.Value = cmbTC.SelectedItem.ToString();
 
+                Range TSAT = worksheet.Rows.Cells[115, 2];
+                TSAT.Value = (fluid.Tsat).ToString();
+
                 //Range row31 = worksheet.Rows.Cells[48, 10];
                 //row31.Value = cmbTBU.SelectedItem.ToString();
 
@@ -467,7 +478,7 @@ namespace GetResultFormulas
                 //Range row29 = worksheet.Rows.Cells[46, 6];
                 //row29.Value = textBox10.Text;
 
-                
+
 
 
 
@@ -511,18 +522,18 @@ namespace GetResultFormulas
                //textBox10.Text = (Math.Round(double.Parse(txtCPress.Text), 2)*2).ToString();
                 txtSWMWNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[18, 24])), 2).ToString();
                 txtVSHRNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[19, 24])), 2).ToString();
-                txtRFCMaxF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[21, 18])),2).ToString();
-                txtRFCNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[21, 24])), 2).ToString();
-                txtRFCMinF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[21, 30])), 3).ToString();
+                txtRFCMaxF.Text = isValidS(worksheet.Rows.Cells[21, 18]);
+                txtRFCNF.Text = isValidS(worksheet.Rows.Cells[21, 24]);
+                txtRFCMinF.Text = isValidS(worksheet.Rows.Cells[21, 30]);
                 //cmbTSize.Text = isValidS(worksheet.Rows.Cells[46, 6]);
                 txtVVMaxF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[24, 18])), 2).ToString();
                 txtVVNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[24, 24])), 2).ToString();
                 txtVVMinF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[24, 30])), 3).ToString();
-                txtAPSNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[23, 27])), 2).ToString();
+                txtAPSNF.Text = isValidS(worksheet.Rows.Cells[23, 27]);
                 txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound).ToString()), 2).ToString();
-                Variables.soundNorm = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[23, 27])), 2);
-                txtAPSMinF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[23, 33])), 3).ToString();
-                Variables.soundMin = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[23, 33])), 2);
+                Variables.soundNorm = worksheet.Rows.Cells[23, 27].value;
+                txtAPSMinF.Text = isValidS(worksheet.Rows.Cells[23, 33]);
+                Variables.soundMin = worksheet.Rows.Cells[23, 33].value;
                 txtLPD.Text = isValidS(worksheet.Rows.Cells[26, 13]);
                 txtAMM.Text = worksheet.Rows.Cells[27, 26].Value.ToString();
                 textBox6.Text = worksheet.Rows.Cells[29, 16].Value.ToString();
@@ -563,6 +574,7 @@ namespace GetResultFormulas
                 rangepacking = worksheet.get_Range("AU72", "AU77") as _Excel.Range;
                 rangeseat = worksheet.get_Range("AR96", "AR99") as _Excel.Range;
                 rangebonnet = worksheet.get_Range("AU81", "AU85") as _Excel.Range;
+                rangematerial = worksheet.get_Range("AU88", "AU90") as _Excel.Range;
                 //pneumatic = worksheet.get_Range("AS102", "AS105") as _Excel.Range;
                 //electric = worksheet.get_Range("AS107", "AS110") as _Excel.Range;
                 //balancing = worksheet.get_Range("AU102", "AU105") as _Excel.Range;
@@ -669,12 +681,15 @@ namespace GetResultFormulas
                 }
 
 
-                //comboBox11.Items.Clear();
-                //foreach (_Excel.Range cell in rangecv.Cells)
-                //{
-                    
-                //    comboBox11.Items.Add((cell.Value2).ToString() as string);
-                //}
+                comboBox25.Items.Clear();
+                foreach (_Excel.Range cell in rangematerial.Cells)
+                {
+                    string value = (cell.Value2).ToString();
+                    if (distinct.Add(value))
+                        comboBox25.Items.Add(value);
+
+                }
+                comboBox25.SelectedIndex = 0;
 
                 comboBox12.Items.Clear();
                 foreach (_Excel.Range cell in rangepacking.Cells)
@@ -1149,10 +1164,10 @@ namespace GetResultFormulas
             }
 
 
-            catch (Exception ee)
+            catch (Exception eeee)
             {
 
-                _ = MessageBox.Show(/*"One or more conditions is Out of Limit / State"*/ee.ToString());
+                _ = MessageBox.Show(/*"One or more conditions is Out of Limit / State"*/eeee.ToString());
             }
             finally
             {
@@ -1183,7 +1198,11 @@ namespace GetResultFormulas
                 Double.TryParse(str, out f);
                 if (f > 0)
                 {
-                    return str;
+                    return Math.Round(double.Parse(str),2).ToString();
+                }
+                else
+                {
+                    return "#";
                 }
             }
             catch (Exception e)
@@ -1454,6 +1473,7 @@ namespace GetResultFormulas
 
         private void button4_Click(object sender, EventArgs e)
         {
+            
             if (textBox4.BackColor==Color.Green && textBox3.BackColor == Color.Green && comboBox12.SelectedIndex != -1 && comboBox8.SelectedIndex != -1 && comboBox11.SelectedIndex != -1 && comboBox9.SelectedIndex != -1 && cmbTType.SelectedIndex != -1 && double.Parse(textBox2.Text)<=double.Parse(comboBox11.SelectedItem.ToString()))
             {
                 groupBox5.Visible = true;
@@ -1466,6 +1486,51 @@ namespace GetResultFormulas
                 button5.Visible = false;
                 button6.Visible = true;
             }
+
+            else if (textBox4.BackColor != Color.Green)
+            {
+                MessageBox.Show("Velocity too high , Select high valve size or contact factory");
+            }
+            else if (textBox3.BackColor != Color.Green)
+            {
+                MessageBox.Show("Sound too high , Select different trim or Contact factory");
+            }
+            else if (comboBox12.SelectedIndex == -1)
+            {
+                MessageBox.Show("Please select a Packing Material");
+            }
+            else if (comboBox8.SelectedIndex == -1)
+            {
+                MessageBox.Show("Please select a Bonnet");
+            }
+
+
+
+            //else if (textBox4.BackColor != Color.Green)
+            //{
+            //    MessageBox.Show("");
+            //}
+            //else if (textBox3.BackColor != Color.Green)
+            //{
+            //    MessageBox.Show("");
+            //}
+            //else if (comboBox12.SelectedIndex == -1)
+            //{
+            //    MessageBox.Show("");
+            //}
+            //else if (comboBox8.SelectedIndex == -1)
+            //{
+            //    MessageBox.Show("");
+            //}
+            //else if (comboBox11.SelectedIndex == -1)
+            //{
+            //    MessageBox.Show("");
+            //}
+            //else if (comboBox9.SelectedIndex == -1)
+            //{
+            //    MessageBox.Show("");
+            //}
+
             else
             {
                 MessageBox.Show("Please complete selection / Eliminate Red warnings to continue" , "Attention",
@@ -1493,6 +1558,7 @@ namespace GetResultFormulas
             _Excel.Range pneumatic;
             _Excel.Range electric;
             _Excel.Range balancing;
+            
 
 
 
@@ -1605,7 +1671,7 @@ namespace GetResultFormulas
             catch (Exception ee)
             {
 
-                _ = MessageBox.Show(/*"One or more conditions is Out of Limit / State"*/ee.ToString());
+                _ = MessageBox.Show("One or more conditions is Out of Limit / State"/*ee.ToString()*/);
             }
             finally
             {
@@ -1644,7 +1710,7 @@ namespace GetResultFormulas
                 //comboBox1.Items.Add("Pillar");
                 //comboBox1.Items.Add("Handwheel");
                 //comboBox1.Items.Add("Voltage/supply");
-                comboBox1.Items.Add("none");
+                //comboBox1.Items.Add("none");
                 comboBox1.Items.Add("2-3 Points input");
                 comboBox1.Items.Add("4-20 mA input");
                 comboBox1.Items.Add("20-4 mA input");
@@ -1669,12 +1735,12 @@ namespace GetResultFormulas
                 groupBox12.Location = new System.Drawing.Point(472,17);
 
                 comboBox13.Items.Clear();
-                comboBox13.Items.Add("No Output");
+                //comboBox13.Items.Add("No Output");
                 comboBox13.Items.Add("4-20 mA Output");
                 comboBox13.Items.Add("0-10 V Output");
                 comboBox13.SelectedIndex = 0;
                 comboBox14.Items.Clear();
-                comboBox14.Items.Add("None");
+                //comboBox14.Items.Add("None");
                 comboBox14.Items.Add("Voltage/supply");
                 comboBox14.SelectedIndex = 0;
                 checkBox6.Visible = false;
@@ -2163,6 +2229,7 @@ namespace GetResultFormulas
                 //stainless steel act
                 if (checkBox6.Checked == true)
                 {
+
                     steel.Value = "YES";
                 }
                 else
@@ -2172,13 +2239,15 @@ namespace GetResultFormulas
 
                 Range yoke = worksheet.Rows.Cells[115, 2];
                 yoke.Value = comboBox23.SelectedItem.ToString();
+
             }
 
 
             catch (Exception ee)
             {
 
-                _ = MessageBox.Show(/*"One or more conditions is Out of Limit / State"*/ee.ToString());
+                _ = MessageBox.Show("One or more Options not selected " +
+                    "\n Eg: Confirm that Actuator Type is selected"/*ee.ToString()*/,"Selection Error",MessageBoxButtons.OK,MessageBoxIcon.Hand);
             }
             finally
             {
@@ -2343,6 +2412,7 @@ namespace GetResultFormulas
             //    comboBox11.SelectedItem = double.Parse(textBox2.Text);
 
             //}
+            comboBox23.SelectedIndex = 0;
             double[] collection = { 0.059, 0.165, 0.33, 0.55, 0.825, 1.1, 1.43, 1.65, 2.2, 2.53, 3.3, 4.95 };
             double[] collection20 = { 0.059, 0.165, 0.33, 0.55, 0.825, 1.1, 1.43, 1.65, 2.2, 2.53, 3.3, 4.95, 6.93 };
             double[] collection25 = { 0.059, 0.165, 0.33, 0.55, 0.825, 1.1, 1.43, 1.65, 2.2, 2.53, 3.3, 4.95, 6.93, 12.1 };
@@ -2608,9 +2678,10 @@ namespace GetResultFormulas
                     break;
                 case "PN25":
                     comboBox24.Items.Clear();
-                    comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                    //comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
                     comboBox24.Items.Add("ASME B16.5-150 RF");
                     comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+
                     
                     break;
                 case "#150":
@@ -3056,40 +3127,55 @@ namespace GetResultFormulas
             //added
             process.Dispose();
             process.Close();
+            try
+            {
+                _PrintExcel.Workbook workbook3 = new _PrintExcel.Workbook();
+                workbook3.LoadFromFile(filename + "\\Demo.xlsx");
+
+                _PrintExcel.Worksheet sheet1 = workbook3.Worksheets["printout"];
+
+
+                //PrintDialog dialog = new PrintDialog();
+                //dialog.AllowPrintToFile = true;
+                //dialog.AllowCurrentPage = true;
+                //dialog.AllowSomePages = true;
+                //dialog.AllowSelection = true;
+                //dialog.UseEXDialog = true;
+                //dialog.PrinterSettings.Duplex = Duplex.Simplex;
+                //dialog.PrinterSettings.PrintRange = PrintRange.SomePages;
+                //workbook2.PrintDialog = dialog;
+                //PrintDocument pd = workbook3.PrintDocument;
+                //if (dialog.ShowDialog() == DialogResult.OK)
+                //{ pd.Print(); }
 
 
 
-
-            _PrintExcel.Workbook workbook3 = new _PrintExcel.Workbook();
-            workbook3.LoadFromFile(filename + "\\Demo.xlsx");
-
-            _PrintExcel.Worksheet sheet1 = workbook3.Worksheets["printout"];
-
-
-            //PrintDialog dialog = new PrintDialog();
-            //dialog.AllowPrintToFile = true;
-            //dialog.AllowCurrentPage = true;
-            //dialog.AllowSomePages = true;
-            //dialog.AllowSelection = true;
-            //dialog.UseEXDialog = true;
-            //dialog.PrinterSettings.Duplex = Duplex.Simplex;
-            //dialog.PrinterSettings.PrintRange = PrintRange.SomePages;
-            //workbook2.PrintDialog = dialog;
-            PrintDocument pd = workbook3.PrintDocument;
-            //if (dialog.ShowDialog() == DialogResult.OK)
-            //{ pd.Print(); }
+                sheet1.SaveToPdf(path + "Sizing Printout.pdf");
 
 
 
-            sheet1.SaveToPdf(path + "Sizing Printout.pdf");
-            System.Diagnostics.Process.Start("explorer.exe", path + "Sizing Printout.pdf");
-           
-            sheet1.Dispose();
-            workbook3.Dispose();
-            
-            
-            //workbook3.Application.Quit();
-            //workbook3.Quit();
+                System.Diagnostics.Process.Start(path + "Sizing Printout.pdf");
+
+                //sheet1.Dispose();
+                //workbook3.Dispose();
+
+
+                //workbook3.Application.Quit();
+                //workbook3.Quit();
+
+
+
+            }
+            catch (Exception eee)
+            {
+                MessageBox.Show("Please close any open printout first"/*eee.ToString()*/);
+
+            }
+            finally
+            {
+                
+            }
+
 
 
 
@@ -3151,15 +3237,7 @@ namespace GetResultFormulas
 
         private void checkedListBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (checkedListBox1.GetItemCheckState(9) == System.Windows.Forms.CheckState.Checked)
-            {
-                checkedListBox1.SetItemChecked(10, false);
-            }
-            else if (checkedListBox1.GetItemCheckState(10) == System.Windows.Forms.CheckState.Checked)
-            {
-                checkedListBox1.SetItemChecked(9, false);
-            }
-            
+          
         }
 
         private void comboBox17_SelectedIndexChanged(object sender, EventArgs e)
@@ -3198,6 +3276,20 @@ namespace GetResultFormulas
         private void textBox11_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void checkedListBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            
+            if (checkedListBox1.GetItemCheckState(10) == System.Windows.Forms.CheckState.Checked)
+            {
+                checkedListBox1.SetItemChecked(9, false);
+            }
+            else if (checkedListBox1.GetItemCheckState(9) == System.Windows.Forms.CheckState.Checked)
+            {
+                checkedListBox1.SetItemChecked(10, false);
+            }
+           
         }
     }
 
