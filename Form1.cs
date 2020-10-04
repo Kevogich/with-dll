@@ -84,7 +84,7 @@ namespace GetResultFormulas
 
 
 
-            cmbVBFD.Items.Add("Open");
+            cmbVBFD.Items.Add("Open ");
             cmbVBFD.Items.Add("Close");
 
 
