@@ -1,4 +1,4 @@
-﻿namespace GetResultFormulas
+﻿namespace AID2
 {
     partial class Form2
     {
@@ -157,6 +157,7 @@
             this.button2.Text = "DSS";
             this.button2.TextAlign = System.Drawing.ContentAlignment.BottomRight;
             this.button2.UseVisualStyleBackColor = false;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             this.button2.MouseHover += new System.EventHandler(this.button2_MouseHover);
             // 
             // button1

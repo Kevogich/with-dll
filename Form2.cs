@@ -1,5 +1,6 @@
 ﻿using MaterialSkin;
 using MaterialSkin.Controls;
+using ModernGUI_V3;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace GetResultFormulas
+namespace AID2
 {
     public partial class Form2 : Form //MaterialForm
     {
@@ -67,12 +68,21 @@ namespace GetResultFormulas
 
         private void button4_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         private void CONTR_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+
+            FormPrincipal formprincipal = new FormPrincipal();
+            formprincipal.ShowDialog();
+            this.Close();
         }
     }
 }

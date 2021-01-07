@@ -4,7 +4,7 @@ using SharpFluids;
 using UnitsNet;
 
 
-namespace GetResultFormulas
+namespace AID2
 {
     static class Program
     {
@@ -16,7 +16,7 @@ namespace GetResultFormulas
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form2());
+            Application.Run(new Form1());
         }
     }
     

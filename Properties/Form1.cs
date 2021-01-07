@@ -16,13 +16,18 @@ using System.Drawing;
 using Workbook = Spire.Xls.Workbook;
 using SharpFluids;
 using UnitsNet;
+using System.Collections;
+using System.Globalization;
+using AutoUpdaterDotNET;
 
-namespace GetResultFormulas
+
+namespace AID2
 {
 
-    
+
     public partial class Form1 : Form
     {
+
         public static class Util
         {
             public enum Effect { Roll, Slide, Center, Blend }
@@ -49,6 +54,7 @@ namespace GetResultFormulas
             private static extern bool AnimateWindow(IntPtr handle, int msec, int flags);
         }
 
+
         public class Variables
         {
             public static double sound;
@@ -65,6 +71,29 @@ namespace GetResultFormulas
             public static double maxvelocity;
             public static int NoiseAttenut;
 
+            public static double normalt;
+            public static double minimumt;
+
+            public static double maximump1;
+            public static double normalp1;
+            public static double minimump1;
+            public static double normalp2;
+            public static double minimump2;
+
+            public static double flowratemin;
+            public static double flowratenorm;
+            public static double flowratemax;
+
+            public static double Density;
+            public static List<string> pneum = new List<string>();
+
+            public static List<string> suitable = new List<string>();
+            public List<string> GetList()
+            {
+                return suitable;
+            }
+
+
 
             //public static double minp2;
             //public static double normp2;
@@ -76,11 +105,15 @@ namespace GetResultFormulas
             //public static double minm3h;
 
         }
-            public Form1()
+        public Form1()
         {
             InitializeComponent();
+            AutoUpdater.InstalledVersion = new Version("0.0.0.0");
+            AutoUpdater.Synchronous = true;
+            AutoUpdater.Start("https://github.com/Kevogich/Updates/raw/main/Arm.xml");
+
             filename = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            
+
             cmbFluid.Items.Add("Acetylene");
             cmbFluid.Items.Add("AIR");
             cmbFluid.Items.Add("AMMONIA");
@@ -139,14 +172,9 @@ namespace GetResultFormulas
 
 
 
-            cmbTC.Items.Add("Equal percentage");
-            cmbTC.Items.Add("Linear");
-            cmbTC.Items.Add("On-Off");
-            cmbTC.Items.Add("Bi-Linear");
-            cmbTC.Items.Add("Tri-Linear");
-            cmbTC.Items.Add("Soecial");
 
-            
+
+
             cmbTBU.Items.Add("RPTFE V-Rings");
             //cmbTBU.Items.Add("PTFE Rings [G]");
             cmbTBU.Items.Add("Graphite rings");
@@ -196,7 +224,7 @@ namespace GetResultFormulas
 
             cmbState.SelectedIndex = 0;
             cmbTBU.SelectedIndex = 3;
-            cmbTC.SelectedIndex = 0;
+            //cmbTC.SelectedIndex = 0;
 
             //cmbTType.SelectedIndex = 0;
             cmbUnit.SelectedIndex = 0;
@@ -208,20 +236,26 @@ namespace GetResultFormulas
 
         private void Button2_Click(object sender, EventArgs e)
         {
-            
+
             Cursor.Current = Cursors.WaitCursor;
 
             Fluid fluid;
+
+
+
+
+
+
 
 
             if (cmbFluid.SelectedItem.ToString() == "AMMONIA")
             {
                 fluid = new Fluid(FluidList.Ammonia);
             }
-            else if (cmbFluid.SelectedItem.ToString() == "OXYGEN")
-            {
-                fluid = new Fluid(FluidList.Oxygen);
-            }
+            //else if (cmbFluid.SelectedItem.ToString() == "OXYGEN")
+            //{
+            //    fluid = new Fluid(FluidList.Oxygen);
+            //}
             else if (cmbFluid.SelectedItem.ToString() == "DOWTHERM-A")
             {
                 fluid = new Fluid(FluidList.InCompDowthermJ);
@@ -282,10 +316,10 @@ namespace GetResultFormulas
             {
                 fluid = new Fluid(FluidList.Methane);
             }
-            else if (cmbFluid.SelectedItem.ToString() == "AIR")
-            {
-                fluid = new Fluid(FluidList.Air);
-            }
+            //else if (cmbFluid.SelectedItem.ToString() == "AIR")
+            //{
+            //    fluid = new Fluid(FluidList.Air);
+            //}
             else if (cmbFluid.SelectedItem.ToString() == "ARGON")
             {
                 fluid = new Fluid(FluidList.Argon);
@@ -315,7 +349,7 @@ namespace GetResultFormulas
             {
                 fluid = new Fluid(FluidList.NitrousOxide);
             }
-            
+
 
             else if (cmbFluid.SelectedItem.ToString() == "PROPANE")
             {
@@ -330,7 +364,7 @@ namespace GetResultFormulas
                 fluid = new Fluid(FluidList.SulfurDioxide);
             }
 
-            else if (cmbFluid.SelectedItem.ToString() == "WATER"|| cmbFluid.SelectedItem.ToString() == "STEAM Saturated"|| cmbFluid.SelectedItem.ToString() == "STEAM Superheated")
+            else if (cmbFluid.SelectedItem.ToString() == "WATER" || cmbFluid.SelectedItem.ToString() == "STEAM Saturated" || cmbFluid.SelectedItem.ToString() == "STEAM Superheated")
             {
                 fluid = new Fluid(FluidList.Water);
             }
@@ -341,22 +375,201 @@ namespace GetResultFormulas
                 fluid = new Fluid(FluidList.Ethane);
             }
 
-            if (cmbState.SelectedIndex==3)
+            if (cmbState.SelectedIndex == 3)
             {
-                fluid.UpdatePT(Pressure.FromBars(int.Parse(txtIPMaxF.Text)), Temperature.FromDegreesCelsius(int.Parse(txtITSMaxF.Text)));
+                fluid.UpdatePT(Pressure.FromBars(int.Parse(txtIPMaxF.Text)), Temperature.FromDegreesCelsius(double.Parse(txtITSMaxF.Text, NumberStyles.Number)));
             }
             else
             {
                 fluid.UpdatePT(Pressure.FromBars(int.Parse(txtIPMaxF.Text)), Temperature.FromDegreesCelsius(int.Parse(txtITMaxF.Text)));
             }
+            Variables.Density = fluid.Density.KilogramsPerCubicMeter;
 
-            
-            _ = MessageBox.Show("Density of " + cmbFluid.SelectedItem.ToString() + fluid.Density + " " + fluid.Viscosity + " " + fluid.Tsat);
+
+
+            //flowrate conversions 
+            if (cmbUnit.SelectedItem.ToString() == "Kg/h")
+            {
+                //kg/h to m3h
+                Variables.flowratemax = double.Parse(txtFRMaxF.Text) / Variables.Density;
+                Variables.flowratenorm = double.Parse(txtFRNF.Text) / Variables.Density;
+                Variables.flowratemin = double.Parse(txtFRMinF.Text) / Variables.Density;
+            }
+
+            else if (cmbUnit.SelectedItem.ToString() == "lb/h")
+            {
+                //convert lb/ h to m3h 
+                MassFlow f11 = MassFlow.FromPoundsPerHour(double.Parse(txtFRMaxF.Text));
+                MassFlow f22 = MassFlow.FromPoundsPerHour(double.Parse(txtFRNF.Text));
+                MassFlow f33 = MassFlow.FromPoundsPerHour(double.Parse(txtFRMinF.Text));
+
+                Variables.flowratemax = double.Parse(f11.KilogramsPerHour.ToString()) / Variables.Density;
+                Variables.flowratenorm = double.Parse(f22.KilogramsPerHour.ToString()) / Variables.Density;
+                Variables.flowratemin = double.Parse(f33.KilogramsPerHour.ToString()) / Variables.Density;
+            }
+            else if (cmbUnit.SelectedItem.ToString() == "t/h")
+            {
+                //convert t/ h to m3h 
+                MassFlow f11 = MassFlow.FromTonnesPerHour(double.Parse(txtFRMaxF.Text));
+                MassFlow f22 = MassFlow.FromTonnesPerHour(double.Parse(txtFRNF.Text));
+                MassFlow f33 = MassFlow.FromTonnesPerHour(double.Parse(txtFRMinF.Text));
+
+                Variables.flowratemax = double.Parse(f11.KilogramsPerHour.ToString()) / Variables.Density;
+                Variables.flowratenorm = double.Parse(f22.KilogramsPerHour.ToString()) / Variables.Density;
+                Variables.flowratemin = double.Parse(f33.KilogramsPerHour.ToString()) / Variables.Density;
+            }
+            else if (cmbUnit.SelectedItem.ToString() == "L/h (Spec.)")
+            {
+                //convert litres/ h to m3h 
+                VolumeFlow f11 = VolumeFlow.FromLitersPerHour(double.Parse(txtFRMaxF.Text));
+                VolumeFlow f22 = VolumeFlow.FromLitersPerHour(double.Parse(txtFRNF.Text));
+                VolumeFlow f33 = VolumeFlow.FromLitersPerHour(double.Parse(txtFRMinF.Text));
+
+                Variables.flowratemax = f11.CubicMetersPerHour;
+                Variables.flowratenorm = f22.CubicMetersPerHour;
+                Variables.flowratemin = f33.CubicMetersPerHour;
+            }
+
+            else
+            {
+                //m3h and Nm3h to m3h
+                Variables.flowratemax = double.Parse(txtFRMaxF.Text);
+                Variables.flowratenorm = double.Parse(txtFRNF.Text);
+                Variables.flowratemin = double.Parse(txtFRMinF.Text);
+            }
+
+            //MessageBox.Show(Variables.flowratemax.ToString());
+
+
+
+
+            //convert to Degrees 
+
+
+            if (cmbITUnit.SelectedIndex == 0)
+            {
+                Temperature normal = Temperature.FromDegreesFahrenheit(double.Parse(txtITNF.Text));
+                Temperature minimum = Temperature.FromDegreesFahrenheit(double.Parse(txtITMinF.Text));
+                Variables.normalt = normal.DegreesCelsius;
+                Variables.minimumt = minimum.DegreesCelsius;
+
+            }
+            else if (cmbITUnit.SelectedIndex == 2)
+            {
+                Temperature normal = Temperature.FromKelvins(double.Parse(txtITNF.Text));
+                Temperature minimum = Temperature.FromKelvins(double.Parse(txtITMinF.Text));
+                Variables.normalt = normal.DegreesCelsius;
+                Variables.minimumt = minimum.DegreesCelsius;
+            }
+            else
+            {
+                Variables.normalt = double.Parse(txtITNF.Text);
+                Variables.minimumt = double.Parse(txtITMinF.Text);
+            }
+            //MessageBox.Show(Variables.normalt.ToString());
+            //MessageBox.Show(Variables.minimumt.ToString());
+
+
+
+            if (cmbITUnit.SelectedIndex == 0)
+            {
+                //kilopascal to bar
+                //p1 in pressure
+                Pressure maxpres = Pressure.FromKilopascals(double.Parse(txtIPMaxF.Text));
+                Pressure np1 = Pressure.FromKilopascals(double.Parse(txtIPNF.Text));
+                Pressure mp1 = Pressure.FromKilopascals(double.Parse(txtIPMinF.Text));
+                Variables.normalp1 = np1.Bars;
+                Variables.minimump1 = mp1.Bars;
+                Variables.maximump1 = maxpres.Bars;
+                //p2 out pressure 
+                Pressure np2 = Pressure.FromKilopascals(double.Parse(txtOPNF.Text));
+                Pressure mp2 = Pressure.FromKilopascals(double.Parse(txtOPMinF.Text));
+                Variables.normalp2 = np2.Bars;
+                Variables.minimump2 = mp2.Bars;
+            }
+            else if (cmbITUnit.SelectedIndex == 1)
+            {
+                //bar to bar
+                //p1 in pressure
+
+                Variables.normalp1 = double.Parse(txtIPNF.Text);
+                Variables.minimump1 = double.Parse(txtIPMinF.Text);
+                Variables.maximump1 = double.Parse(txtIPMaxF.Text);
+
+                //p2 out pressure 
+
+                Variables.normalp2 = double.Parse(txtOPNF.Text);
+                Variables.minimump2 = double.Parse(txtOPMinF.Text);
+            }
+            else if (cmbITUnit.SelectedIndex == 2)
+            {
+                Pressure np1 = Pressure.FromPoundsForcePerSquareInch(double.Parse(txtIPNF.Text));
+                Pressure mp1 = Pressure.FromPoundsForcePerSquareInch(double.Parse(txtIPMinF.Text));
+                Pressure maxpres = Pressure.FromPoundsForcePerSquareInch(double.Parse(txtIPMaxF.Text));
+                Variables.maximump1 = maxpres.Bars;
+                Variables.normalp1 = np1.Bars;
+                Variables.minimump1 = mp1.Bars;
+
+
+                //p2 out pressure 
+                Pressure np2 = Pressure.FromPoundsForcePerSquareInch(double.Parse(txtOPNF.Text));
+                Pressure mp2 = Pressure.FromPoundsForcePerSquareInch(double.Parse(txtOPMinF.Text));
+                Variables.normalp2 = np2.Bars;
+                Variables.minimump2 = mp2.Bars;
+            }
+            else if (cmbITUnit.SelectedIndex == 3)
+            {
+                Pressure np1 = Pressure.FromKilogramsForcePerSquareCentimeter(double.Parse(txtIPNF.Text));
+                Pressure mp1 = Pressure.FromKilogramsForcePerSquareCentimeter(double.Parse(txtIPMinF.Text));
+                Pressure maxpres = Pressure.FromKilogramsForcePerSquareCentimeter(double.Parse(txtIPMaxF.Text));
+                Variables.maximump1 = maxpres.Bars;
+                Variables.normalp1 = np1.Bars;
+                Variables.minimump1 = mp1.Bars;
+
+                //p2 out pressure 
+                Pressure np2 = Pressure.FromKilogramsForcePerSquareCentimeter(double.Parse(txtOPNF.Text));
+                Pressure mp2 = Pressure.FromKilogramsForcePerSquareCentimeter(double.Parse(txtOPMinF.Text));
+                Variables.normalp2 = np2.Bars;
+                Variables.minimump2 = mp2.Bars;
+            }
+            else if (cmbITUnit.SelectedIndex == 5)
+            {
+                Pressure np1 = Pressure.FromMillimetersOfMercury(double.Parse(txtIPNF.Text));
+                Pressure mp1 = Pressure.FromMillimetersOfMercury(double.Parse(txtIPMinF.Text));
+                Pressure maxpres = Pressure.FromMillimetersOfMercury(double.Parse(txtIPMaxF.Text));
+                Variables.maximump1 = maxpres.Bars;
+                Variables.normalp1 = np1.Bars;
+                Variables.minimump1 = mp1.Bars;
+
+                //p2 out pressure 
+                Pressure np2 = Pressure.FromMillimetersOfMercury(double.Parse(txtOPNF.Text));
+                Pressure mp2 = Pressure.FromMillimetersOfMercury(double.Parse(txtOPMinF.Text));
+                Variables.normalp2 = np2.Bars;
+                Variables.minimump2 = mp2.Bars;
+            }
+            else
+            {
+
+                //p1 in pressure
+
+                Variables.normalp1 = double.Parse(txtIPNF.Text) * 0.000098;
+                Variables.minimump1 = double.Parse(txtIPMinF.Text) * 0.000098;
+                Variables.maximump1 = double.Parse(txtIPMaxF.Text) * 0.000098;
+
+                //p2 out pressure 
+
+                Variables.normalp2 = double.Parse(txtOPNF.Text) * 0.000098;
+                Variables.minimump2 = double.Parse(txtOPMinF.Text) * 0.000098;
+            }
+
+
+            //MessageBox.Show("Density of " + cmbFluid.SelectedItem.ToString() + Variables.Density.ToString() + " " + fluid.DynamicViscosity + " " + fluid.Tsat);
+
 
             //Console.WriteLine("Density of water at 13°C: " + Water.Density);
 
             //Console.ReadLine();
-            
+
             txtCPress.Text = "";
             textBox6.Text = "";
             txtAPSMaxF.Text = "";
@@ -388,7 +601,7 @@ namespace GetResultFormulas
 
 
             Application excel = new Application();
-            
+
 
             _Excel.Workbook workbook = excel.Workbooks.Open(filename + "\\Demo.xlsx", ReadOnly: false, Editable: true);
             _Excel.Worksheet worksheet = workbook.Worksheets["SELECTION"] as _Excel.Worksheet;
@@ -398,7 +611,7 @@ namespace GetResultFormulas
             _Excel.Range rangepacking;
             _Excel.Range rangeseat;
             _Excel.Range rangematerial;
-            //_Excel.Range electric;
+            _Excel.Range rating;
             //_Excel.Range balancing;
 
 
@@ -460,8 +673,8 @@ namespace GetResultFormulas
                 row16.Value = txtITMinF.Text;
 
 
-                Range row30 = worksheet.Rows.Cells[47, 8];
-                row30.Value = cmbTC.SelectedItem.ToString();
+                //Range row30 = worksheet.Rows.Cells[47, 8];
+                //row30.Value = cmbTC.SelectedItem.ToString();
 
                 Range TSAT = worksheet.Rows.Cells[115, 2];
                 TSAT.Value = (fluid.Tsat).ToString();
@@ -499,7 +712,7 @@ namespace GetResultFormulas
                 Range row43 = worksheet.Rows.Cells[17, 18];
                 Range row45 = worksheet.Rows.Cells[17, 30];
                 Range row44 = worksheet.Rows.Cells[17, 24];
-                if (cmbState.SelectedIndex ==2)
+                if (cmbState.SelectedIndex == 2)
                 {
                     txtITSMaxF.Text = isValidS(worksheet.Rows.Cells[109, 43]);
                     txtITSNF.Text = isValidS(worksheet.Rows.Cells[110, 43]);
@@ -507,19 +720,19 @@ namespace GetResultFormulas
                 }
                 else
                 {
-                    
-                    
+
+
                 }
                 row43.Value = txtITSMaxF.Text;
 
-                
+
                 row44.Value = txtITSNF.Text;
 
-                
+
                 row45.Value = txtITSMinF.Text;
 
                 txtCPress.Text = isValidS(worksheet.Rows.Cells[10, 30]);
-               //textBox10.Text = (Math.Round(double.Parse(txtCPress.Text), 2)*2).ToString();
+                //textBox10.Text = (Math.Round(double.Parse(txtCPress.Text), 2)*2).ToString();
                 txtSWMWNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[18, 24])), 2).ToString();
                 txtVSHRNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[19, 24])), 2).ToString();
                 txtRFCMaxF.Text = isValidS(worksheet.Rows.Cells[21, 18]);
@@ -527,8 +740,8 @@ namespace GetResultFormulas
                 txtRFCMinF.Text = isValidS(worksheet.Rows.Cells[21, 30]);
                 //cmbTSize.Text = isValidS(worksheet.Rows.Cells[46, 6]);
                 txtVVMaxF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[24, 18])), 2).ToString();
-                txtVVNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[24, 24])), 2).ToString();
-                txtVVMinF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[24, 30])), 3).ToString();
+                //txtVVNF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[24, 24])), 2).ToString();
+                //txtVVMinF.Text = Math.Round(double.Parse(isValidS(worksheet.Rows.Cells[24, 30])), 3).ToString();
                 txtAPSNF.Text = isValidS(worksheet.Rows.Cells[23, 27]);
                 txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound).ToString()), 2).ToString();
                 Variables.soundNorm = worksheet.Rows.Cells[23, 27].value;
@@ -541,7 +754,7 @@ namespace GetResultFormulas
                 textBox1.Text = isValidS(worksheet.Rows.Cells[75, 43]);
                 textBox2.Text = isValidS(worksheet.Rows.Cells[76, 43]);
                 shutoff.Text = worksheet.Rows.Cells[113, 43].Value.ToString();
-                if (int.Parse(shutoff.Text)>100)
+                if (double.Parse(shutoff.Text) > 140)
                 {
                     MessageBox.Show("Pressure is too high \nIt's Recommended that you contact the factory", "Pressure Warning");
                 }
@@ -555,7 +768,7 @@ namespace GetResultFormulas
                 string f = worksheet.Rows.Cells[82, 43].Value.ToString();
                 string g = worksheet.Rows.Cells[83, 43].Value.ToString();
                 string h = worksheet.Rows.Cells[84, 43].Value.ToString();
-                
+
                 Variables.kelvin1 = worksheet.Rows.Cells[88, 43].Value;
                 Variables.nm3h1 = worksheet.Rows.Cells[89, 43].Value;
                 Variables.p1 = worksheet.Rows.Cells[90, 43].Value;
@@ -564,7 +777,7 @@ namespace GetResultFormulas
                 Variables.m3h = worksheet.Rows.Cells[86, 43].Value;
                 Variables.kgh = worksheet.Rows.Cells[87, 43].Value;
                 Variables.sigma = worksheet.Rows.Cells[92, 43].Value;
-                textBox14.Text= worksheet.Rows.Cells[92, 43].Value.ToString();
+                textBox14.Text = worksheet.Rows.Cells[92, 43].Value.ToString();
 
 
 
@@ -575,7 +788,7 @@ namespace GetResultFormulas
                 rangeseat = worksheet.get_Range("AR96", "AR99") as _Excel.Range;
                 rangebonnet = worksheet.get_Range("AU81", "AU85") as _Excel.Range;
                 rangematerial = worksheet.get_Range("AU88", "AU90") as _Excel.Range;
-                //pneumatic = worksheet.get_Range("AS102", "AS105") as _Excel.Range;
+                rating = worksheet.get_Range("AU92", "AU99") as _Excel.Range;
                 //electric = worksheet.get_Range("AS107", "AS110") as _Excel.Range;
                 //balancing = worksheet.get_Range("AU102", "AU105") as _Excel.Range;
 
@@ -592,7 +805,23 @@ namespace GetResultFormulas
                     if (distinct.Add(value))
                         comboBox9.Items.Add(value);
                 }
-                comboBox9.SelectedIndex = 2;
+                //foreach (int item in comboBox9.Items)
+                //{
+                //    if (278 * Variables.m3h / (Math.Pow(item / 2, 2) * 3.14) > Variables.maxvelocity)
+                //    {
+                //        comboBox9.SelectedIndex = comboBox9.Items.IndexOf(item) - 1;
+                //    }
+                //}
+                if (comboBox9.Items.Count > 1)
+                {
+                    comboBox9.SelectedIndex = 2;
+                }
+                else
+                {
+                    comboBox9.SelectedIndex = -1;
+                }
+
+
 
 
                 //ELECTRIC RANGE
@@ -618,13 +847,20 @@ namespace GetResultFormulas
                 //comboBox17.SelectedIndex = 0;
 
 
-                //////BALANCING RANGE
-                //comboBox18.Items.Clear();
-                //foreach (_Excel.Range cell in balancing.Cells)
-                //{
+                //RATING RANGE
+                comboBox10.Items.Clear();
+                foreach (_Excel.Range cell in rating.Cells)
+                {
+                    string value = (cell.Value2).ToString();
 
-                //    comboBox18.Items.Add((cell.Value2).ToString() as string);
-                //}
+                    if (distinct.Add(value))
+                        comboBox10.Items.Add(value);
+
+
+                    //comboBox10.Items.Add((cell.Value2).ToString() as string);
+                }
+                comboBox10.SelectedIndex = -1;
+
 
                 ////PNEUMATIC RANGE
                 //if (comboBox18.Items[0].ToString() == "NAA" /*&& int.Parse(comboBox9.SelectedItem.ToString()) > 49*/)
@@ -680,16 +916,27 @@ namespace GetResultFormulas
                     comboBox15.Items.Add((cell.Value2).ToString() as string);
                 }
 
+                //Rangematerial
+                //comboBox25.Items.Clear();
 
-                comboBox25.Items.Clear();
+
+
+
+                List<string> savedsuit = Variables.suitable;
+
                 foreach (_Excel.Range cell in rangematerial.Cells)
                 {
                     string value = (cell.Value2).ToString();
                     if (distinct.Add(value))
-                        comboBox25.Items.Add(value);
+                        savedsuit.Add(value);
+
 
                 }
-                comboBox25.SelectedIndex = 0;
+
+
+
+
+
 
                 comboBox12.Items.Clear();
                 foreach (_Excel.Range cell in rangepacking.Cells)
@@ -708,8 +955,8 @@ namespace GetResultFormulas
                 }
 
                 //comboBox9.SelectedItem = (textBox1.Text);
-                
-                
+
+
 
 
                 //richTextBox1.Text = (f + "\nPARTIAL CAV f = " + g + "\nMAX CAV f = " + h).ToString();
@@ -723,7 +970,7 @@ namespace GetResultFormulas
                 else
                 {
                     cmbVBFD.SelectedIndex = 0;
-                    if (g=="PARTIAL CAVITATION")
+                    if (g == "PARTIAL CAVITATION")
                     {
                         richTextBox1.Text = (f + "\n" + g).ToString();
                     }
@@ -731,7 +978,7 @@ namespace GetResultFormulas
                     {
                         richTextBox1.Text = (f).ToString();
                     }
-                    
+
                 }
                 if (checkBox2.Checked == true && Variables.power < 50)
                 {
@@ -748,7 +995,7 @@ namespace GetResultFormulas
                     Variables.sound -= 12;
                     Variables.NoiseAttenut = 12;
                 }
-                if (int.Parse(AcceptableNoise.SelectedItem.ToString())< Variables.sound)
+                if (int.Parse(AcceptableNoise.SelectedItem.ToString()) < Variables.sound)
                 {
                     richTextBox1.Select(richTextBox1.TextLength, 0);
                     richTextBox1.SelectionColor = Color.Red;
@@ -1093,6 +1340,26 @@ namespace GetResultFormulas
 
                 if ((string)cmbState.SelectedItem == "Liquid")
                 {
+                    //ANTICAV TRIMS FOR LIQUIDS
+                    if (double.Parse(comboBox11.SelectedItem.ToString()) < 4.95)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Microflow");
+                        cmbTType.Items.Add("Anticav 1");
+                        cmbTType.Items.Add("Anticav 2");
+                        cmbTType.Items.Add(" ");
+                    }
+                    else
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Standard Parabolic");
+                        cmbTType.Items.Add("Anticav 1");
+                        cmbTType.Items.Add("Anticav 2");
+                        cmbTType.Items.Add(" ");
+                    }
+
+
+
                     if (Variables.sigma > 1.5)
                     {
                         cmbTType.SelectedIndex = 0;
@@ -1116,6 +1383,25 @@ namespace GetResultFormulas
                 }
                 else
                 {
+                    //NOISE TRIM FOR GASES
+                    if (double.Parse(comboBox11.SelectedItem.ToString()) < 4.95)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("MicroFlow");
+                        cmbTType.Items.Add("low noise 1");
+                        cmbTType.Items.Add("Low noise 2");
+                        cmbTType.Items.Add(" ");
+                    }
+                    else
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Standard Parabolic");
+                        cmbTType.Items.Add("low noise 1");
+                        cmbTType.Items.Add("Low noise 2");
+                        cmbTType.Items.Add(" ");
+                    }
+
+
                     if (Variables.sound > 85 && Variables.sound <= 100)
                     {
                         cmbTType.SelectedIndex = 1;
@@ -1150,16 +1436,197 @@ namespace GetResultFormulas
                 //{
                 //    textBox4.BackColor = Color.Green;
                 //}
-                
-                Util.Animate(groupBox9, Util.Effect.Slide, 1000, 360);
-                Cursor.Current = Cursors.Default;
-                groupBox9.Visible = false;
-                button2.Visible = false;
-                groupBox5.Visible = false;
-                groupBox10.Visible = true;
-                button3.Visible = false;
-                button1.Visible = true;
-                button4.Visible = true;
+
+
+                if (textBox3.BackColor == Color.Green && textBox13.BackColor == Color.Green && textBox11.BackColor == Color.Green)
+                {
+                    txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound).ToString()), 2).ToString();
+                    txtAPSNF.Text = (Variables.soundNorm).ToString();
+                    txtAPSMinF.Text = (Variables.soundMin).ToString();
+                    textBox14.Text = Variables.sigma.ToString();
+
+                    //comboBox19.Items.Clear();
+                    //comboBox19.Items.Add("316L SS");
+                    //comboBox19.Items.Add("316L SS + STELLITE");
+                    //comboBox19.Items.Add("316L SS + PTFE(WHITE)");
+                    //comboBox19.Items.Add("316L SS + RPTFE");
+                    //comboBox19.Items.Add("316L SS + PEEK");
+
+                    //if liquid
+
+                    if (cmbState.SelectedIndex == 0)
+                    {
+                        //ANTICAV TRIMS FOR LIQUIDS
+                        if (double.Parse(comboBox11.SelectedItem.ToString()) < 4.95)
+                        {
+                            //cavitation levels 
+                            if (textBox11.BackColor == Color.Green)
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Microflow");
+
+                            }
+                            else
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Microflow");
+                                cmbTType.Items.Add("Anticav 1");
+                                cmbTType.Items.Add("Anticav 2");
+
+                            }
+                            //NOISE LEVELS
+                            if (textBox3.BackColor == Color.Green)
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Microflow");
+
+                            }
+                            else
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Microflow");
+                                cmbTType.Items.Add("low noise 1");
+                                cmbTType.Items.Add("Low noise 2");
+
+                            }
+
+
+                            //characteristics microflow
+                            cmbTC.Items.Clear();
+
+                            cmbTC.Items.Add("On-Off");
+
+                        }
+                        else
+                        {
+                            if (textBox3.BackColor == Color.Green && textBox11.BackColor == Color.Green)
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Standard Parabolic");
+                            }
+                            if (textBox11.BackColor != Color.Green)
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Standard Parabolic");
+                                cmbTType.Items.Add("Anticav 1");
+                                cmbTType.Items.Add("Anticav 2");
+                            }
+                            if (textBox3.BackColor != Color.Green)
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Standard Parabolic");
+                                cmbTType.Items.Add("low noise 1");
+                                cmbTType.Items.Add("Low noise 2");
+                            }
+
+
+                            cmbTC.Items.Clear();
+                            cmbTC.Items.Add("Equal percentage");
+                            cmbTC.Items.Add("Linear");
+                            cmbTC.Items.Add("On-Off");
+                            cmbTC.Items.Add("Bi-Linear");
+                            cmbTC.Items.Add("Tri-Linear");
+                            cmbTC.Items.Add("Soecial");
+                        }
+                    }
+                    else
+                    {
+                        //NOISE TRIM FOR GASES
+                        if (double.Parse(comboBox11.SelectedItem.ToString()) < 4.95)
+                        {
+                            if (textBox3.BackColor == Color.Green)
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Microflow");
+
+                            }
+                            else
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Microflow");
+                                cmbTType.Items.Add("low noise 1");
+                                cmbTType.Items.Add("Low noise 2");
+
+                            }
+
+
+                            //characteristics microflow
+                            cmbTC.Items.Clear();
+
+                            cmbTC.Items.Add("On-Off");
+
+                        }
+                        else
+                        {
+                            if (textBox3.BackColor == Color.Green)
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Standard Parabolic");
+                            }
+                            else
+                            {
+                                cmbTType.Items.Clear();
+                                cmbTType.Items.Add("Standard Parabolic");
+                                cmbTType.Items.Add("low noise 1");
+                                cmbTType.Items.Add("Low noise 2");
+                            }
+
+
+
+                            cmbTC.Items.Clear();
+                            cmbTC.Items.Add("Equal percentage");
+                            cmbTC.Items.Add("Linear");
+                            cmbTC.Items.Add("On-Off");
+                            cmbTC.Items.Add("Bi-Linear");
+                            cmbTC.Items.Add("Tri-Linear");
+                            cmbTC.Items.Add("Soecial");
+                        }
+
+
+                    }
+                }
+
+                if (String.IsNullOrEmpty(txtFRSO.Text))
+                {
+                    Util.Animate(groupBox9, Util.Effect.Slide, 1000, 360);
+                    Cursor.Current = Cursors.Default;
+                    groupBox9.Visible = false;
+                    button2.Visible = false;
+                    groupBox5.Visible = false;
+                    groupBox10.Visible = true;
+                    button3.Visible = false;
+                    button1.Visible = true;
+                    button4.Visible = true;
+                }
+                else
+                {
+                    if (Variables.maximump1 > double.Parse(txtFRSO.Text))
+                    {
+
+                        MessageBox.Show("Max P1 shouldn't be greater than Shut-off Pressure");
+                    }
+                    else
+                    {
+
+                        Util.Animate(groupBox9, Util.Effect.Slide, 1000, 360);
+                        Cursor.Current = Cursors.Default;
+                        groupBox9.Visible = false;
+                        button2.Visible = false;
+                        groupBox5.Visible = false;
+                        groupBox10.Visible = true;
+                        button3.Visible = false;
+                        button1.Visible = true;
+                        button4.Visible = true;
+                    }
+                }
+
+
+
+                cmbTC.SelectedIndex = 0;
+                cmbTType.SelectedIndex = 0;
+                comboBox19.SelectedIndex = 0;
+
+
 
             }
 
@@ -1167,22 +1634,25 @@ namespace GetResultFormulas
             catch (Exception eeee)
             {
 
-                _ = MessageBox.Show(/*"One or more conditions is Out of Limit / State"*/eeee.ToString());
+                //_ = MessageBox.Show("One or more conditions is Out of Limit / State"/*eeee.ToString()*/);
             }
             finally
             {
-                
+
                 excel.DisplayAlerts = false;
                 excel.ActiveWorkbook.Save();
                 excel.Application.Quit();
                 excel.Quit();
-                
+
                 /// = MessageBox.Show("You are done");
             }
 
         }
 
-        
+
+
+
+
 
         string filename = "";
         public string isValidS(Range rng)
@@ -1198,7 +1668,7 @@ namespace GetResultFormulas
                 Double.TryParse(str, out f);
                 if (f > 0)
                 {
-                    return Math.Round(double.Parse(str),2).ToString();
+                    return Math.Round(double.Parse(str), 2).ToString();
                 }
                 else
                 {
@@ -1213,7 +1683,7 @@ namespace GetResultFormulas
         }
 
 
-    
+
 
         private void groupBox11_Enter(object sender, EventArgs e)
         {
@@ -1227,7 +1697,7 @@ namespace GetResultFormulas
 
         private void textBox4_TextChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void textBox5_TextChanged(object sender, EventArgs e)
@@ -1283,14 +1753,7 @@ namespace GetResultFormulas
                 cmbUnit.Items.Add("Kg/h");
                 cmbUnit.Items.Add("m3/h");
                 cmbUnit.Items.Add("L/h");
-                cmbUnit.Items.Add("Lb/h (Spec.)");
-
-                //ANTICAV TRIMS FOR LIQUIDS
-                cmbTType.Items.Clear();
-                cmbTType.Items.Add("Standard Parabolic");
-                cmbTType.Items.Add("Anticav 1");
-                cmbTType.Items.Add("Anticav 2");
-                cmbTType.Items.Add(" ");
+                cmbUnit.Items.Add("L/h (Spec.)");
 
                 //Grey Steam Temp
                 cmbITSUnit.Enabled = false;
@@ -1312,13 +1775,9 @@ namespace GetResultFormulas
                 cmbUnit.Items.Add("L/h");
                 //groupBox14.Text = ("Velocity mach");
                 label40.Text = ("Spec Heat Ratio");
-                
-                //NOISE TRIM FOR GASES
-                cmbTType.Items.Clear();
-                cmbTType.Items.Add("Standard Parabolic");
-                cmbTType.Items.Add("low noise 1");
-                cmbTType.Items.Add("Low noise 2");
-                cmbTType.Items.Add(" ");
+
+
+
 
                 cmbITSUnit.Enabled = false;
                 txtITSMaxF.Enabled = false;
@@ -1410,7 +1869,7 @@ namespace GetResultFormulas
             if (cmbUnit.SelectedItem == null)
             {
                 cmbUnit.SelectedItem = ("Kg/h");
-                
+
             }
 
 
@@ -1424,7 +1883,7 @@ namespace GetResultFormulas
 
         private void txtVVMaxF_TextChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void cmbTSize_TextChanged(object sender, EventArgs e)
@@ -1466,6 +1925,8 @@ namespace GetResultFormulas
             button4.Visible = true;
             button5.Visible = false;
             button6.Visible = false;
+            button8.Visible = false;
+            button6.Visible = false;
 
 
 
@@ -1473,8 +1934,8 @@ namespace GetResultFormulas
 
         private void button4_Click(object sender, EventArgs e)
         {
-            
-            if (textBox4.BackColor==Color.Green && textBox3.BackColor == Color.Green && comboBox12.SelectedIndex != -1 && comboBox8.SelectedIndex != -1 && comboBox11.SelectedIndex != -1 && comboBox9.SelectedIndex != -1 && cmbTType.SelectedIndex != -1 && double.Parse(textBox2.Text)<=double.Parse(comboBox11.SelectedItem.ToString()))
+
+            if (textBox4.BackColor == Color.Green && textBox3.BackColor == Color.Green && comboBox12.SelectedIndex != -1 && comboBox8.SelectedIndex != -1 && comboBox11.SelectedIndex != -1 && comboBox9.SelectedIndex != -1 && cmbTType.SelectedIndex != -1 && double.Parse(textBox2.Text) <= double.Parse(comboBox11.SelectedItem.ToString()))
             {
                 groupBox5.Visible = true;
                 groupBox10.Visible = false;
@@ -1484,7 +1945,7 @@ namespace GetResultFormulas
                 button3.Visible = true;
                 button4.Visible = false;
                 button5.Visible = false;
-                button6.Visible = true;
+
             }
 
             else if (textBox4.BackColor != Color.Green)
@@ -1533,7 +1994,7 @@ namespace GetResultFormulas
 
             else
             {
-                MessageBox.Show("Please complete selection / Eliminate Red warnings to continue" , "Attention",
+                MessageBox.Show("Please complete selection / Eliminate Red warnings to continue", "Attention",
                                  MessageBoxButtons.RetryCancel,
                                  MessageBoxIcon.Error);
             }
@@ -1558,7 +2019,7 @@ namespace GetResultFormulas
             _Excel.Range pneumatic;
             _Excel.Range electric;
             _Excel.Range balancing;
-            
+
 
 
 
@@ -1584,7 +2045,7 @@ namespace GetResultFormulas
                 //rangepacking = worksheet.get_Range("AU72", "AU77") as _Excel.Range;
                 rangeseat = worksheet.get_Range("AR96", "AR99") as _Excel.Range;
                 //rangebonnet = worksheet.get_Range("AU81", "AU85") as _Excel.Range;
-                pneumatic = worksheet.get_Range("AS102", "AS105") as _Excel.Range;
+                pneumatic = worksheet.get_Range("AS102", "AS103") as _Excel.Range;
                 electric = worksheet.get_Range("AS107", "AS110") as _Excel.Range;
                 balancing = worksheet.get_Range("AU102", "AU105") as _Excel.Range;
 
@@ -1619,6 +2080,16 @@ namespace GetResultFormulas
                     comboBox18.Items.Add((cell.Value2).ToString() as string);
                 }
 
+                List<string> savedpnem = Variables.pneum;
+                string data = "";
+                foreach (_Excel.Range cell in pneumatic.Cells)
+                {
+                    data = cell.Value2.ToString();
+                    savedpnem.Add(data);
+
+                }
+
+
                 //PNEUMATIC RANGE
                 if (comboBox18.Items[0].ToString() == "NAA" /*&& int.Parse(comboBox9.SelectedItem.ToString()) > 49*/)
                 {
@@ -1641,7 +2112,7 @@ namespace GetResultFormulas
                     }
 
                 }
-                else if (comboBox18.Items[0].ToString() == "NAA" && int.Parse(comboBox9.SelectedItem.ToString()) < 49)
+                if (comboBox18.Items[0].ToString() == "NAA" && int.Parse(comboBox9.SelectedItem.ToString()) < 49)
                 {
                     comboBox16.Items.Clear();
                     comboBox16.Items.Add("Consult Factory");
@@ -1654,8 +2125,44 @@ namespace GetResultFormulas
                     checkBox1.Checked = false;
                     foreach (_Excel.Range cell in pneumatic.Cells)
                     {
+
                         comboBox16.Items.Add((cell.Value2).ToString() as string);
                     }
+                    
+                    //foreach (var item in Variables.pneum)
+                    //{
+                    //    //MessageBox.Show(item.ToString());
+                    //    checkBox1.Checked = false;
+                    //    comboBox16.Items.Clear();
+                    //    comboBox16.Items.Add(item);
+                    //}
+
+                    //if (comboBox21.SelectedItem.ToString() == "Fail Open")
+                    //{
+
+                    //    foreach (var item in Variables.pneum)
+                    //    {
+
+                    //        if (item.EndsWith("15)"))
+                    //        {
+
+                    //            checkBox1.Checked = false;
+                    //            comboBox16.Items.Clear();
+                    //            comboBox16.Items.Add(item);
+
+                    //        }
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    foreach (var item in Variables.pneum)
+                    //    {
+                    //        checkBox1.Checked = false;
+                    //        comboBox16.Items.Clear();
+                    //        comboBox16.Items.Add(item);
+                    //    }
+                    //}
+
                     comboBox16.SelectedIndex = 0;
                 }
 
@@ -1671,7 +2178,7 @@ namespace GetResultFormulas
             catch (Exception ee)
             {
 
-                _ = MessageBox.Show("One or more conditions is Out of Limit / State"/*ee.ToString()*/);
+                //_ = MessageBox.Show("One or more conditions is Out of Limit / State"/*ee.ToString()*/);
             }
             finally
             {
@@ -1683,9 +2190,12 @@ namespace GetResultFormulas
 
                 /// = MessageBox.Show("You are done");
             }
+            //comboBox16.Visible = false;
+            //label48.Visible = false;
 
-
-
+            ////elect act hide before type selection
+            //comboBox17.Visible = false;
+            //label53.Visible = false;
 
         }
 
@@ -1694,10 +2204,39 @@ namespace GetResultFormulas
 
         }
 
+        private void comboBox21_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox21.SelectedItem.ToString() == "Fail Open" && comboBox7.SelectedIndex == 0)
+            {
+                comboBox16.Items.Clear();
+
+                var candidates = new[] { "S200A-130 (20) 0,2 - 1,0  (3 - 15)","S275A-300 (47) 0,2 - 1,0  (3 - 15)","S335A-470 (73) 0,2 - 1,0  (3 - 15)","S430A-740(115) 0,2 - 1,0  (3 - 15)" };
+                foreach (var c in candidates)
+                    if (Variables.pneum.Contains(c))
+
+                        comboBox16.Items.Add(c);
+
+                
+
+            }
+            else
+            {
+                comboBox16.Items.Clear();
+                foreach (var item in Variables.pneum)
+                {
+                    checkBox1.Checked = false;
+                    
+                    comboBox16.Items.Add(item);
+                }
+            }
+        }
+
         private void comboBox7_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBox7.SelectedIndex == 1)
             {
+                groupBox12.Visible = true;
+                groupBox15.Visible = true;
                 comboBox16.Visible = false;
                 comboBox17.Visible = true;
                 //comboBox8.Visible = false;
@@ -1732,7 +2271,7 @@ namespace GetResultFormulas
                 //checkedListBox2.Items.Add("0-10 V Output ");
 
                 groupBox18.Visible = false;
-                groupBox12.Location = new System.Drawing.Point(472,17);
+                groupBox12.Location = new System.Drawing.Point(472, 17);
 
                 comboBox13.Items.Clear();
                 //comboBox13.Items.Add("No Output");
@@ -1756,10 +2295,13 @@ namespace GetResultFormulas
 
             else//not electric
             {
+                groupBox12.Visible = true;
+                groupBox15.Visible = true;
+                groupBox15.Visible = true;
                 comboBox22.Visible = true;
                 comboBox22.Items.Clear();
                 comboBox22.Items.Add("Standard -6mm Rilsan/Comp-Brass");
-                comboBox22.Items.Add("Stainless Steel -1/4 / \"Double\" ferro"); 
+                comboBox22.Items.Add("Stainless Steel -1/4 / \"Double\" ferrure");
                 comboBox22.Items.Add("None");
                 comboBox22.SelectedIndex = 2;
                 label71.Visible = true;
@@ -1778,7 +2320,7 @@ namespace GetResultFormulas
                 comboBox1.SelectedIndex = 0;
                 comboBox13.Items.Clear();
                 comboBox13.Items.Add("None");
-                comboBox13.SelectedIndex = 0; 
+                comboBox13.SelectedIndex = 0;
                 comboBox14.Items.Clear();
                 comboBox14.Items.Add("None");
                 comboBox14.SelectedIndex = 0;
@@ -1794,8 +2336,8 @@ namespace GetResultFormulas
                 groupBox18.Visible = true;
                 groupBox12.Location = new System.Drawing.Point(617, 191);
 
-                
-                
+
+
 
 
             }
@@ -1815,12 +2357,26 @@ namespace GetResultFormulas
 
                 }
             }
-            else
-            {
-                comboBox21.Items.Clear();
-                comboBox21.Items.Add("Fail Close");
-                comboBox21.Items.Add("Fail Open");
-            }
+            //else
+            //{
+            //    //if (comboBox16.SelectedItem.ToString().Contains("15)"))
+            //    //{
+            //    //    comboBox21.Items.Clear();
+                    
+            //    //    comboBox21.Items.Add("Fail Open");
+
+            //    //}
+            //    //else
+            //    //{
+            //    //    comboBox21.Items.Clear();
+            //    //    comboBox21.Items.Add("Fail Close");
+            //    //    comboBox21.Items.Add("Fail Open");
+
+            //    //}
+            //    comboBox21.Items.Clear();
+            //    comboBox21.Items.Add("Fail Close");
+            //    comboBox21.Items.Add("Fail Open");
+            //}
             comboBox21.SelectedIndex = 0;
 
 
@@ -1836,7 +2392,7 @@ namespace GetResultFormulas
                 comboBox9.BackColor = Color.Green;
                 //comboBox9.ForeColor = Color.Green;
                 textBox4.Text = ("VELOCITY OK");
-                
+
                 richTextBox1.Select(richTextBox1.TextLength, 0);
                 richTextBox1.SelectionColor = Color.Green;
                 richTextBox1.AppendText("\nVELOCITY OK");
@@ -1847,7 +2403,7 @@ namespace GetResultFormulas
                 comboBox9.BackColor = Color.Red;
                 //comboBox9.ForeColor = Color.Red;
                 textBox4.Text = ("Velocity too high. Bigger valve size to be selected");
-                
+
 
                 richTextBox1.Select(richTextBox1.TextLength, 0);
                 richTextBox1.SelectionColor = Color.Red;
@@ -1858,7 +2414,7 @@ namespace GetResultFormulas
         string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
 
-        
+
         private void button5_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dialog = new OpenFileDialog())
@@ -1869,10 +2425,10 @@ namespace GetResultFormulas
                 }
             }
 
-    
+
         }
-        
-    
+
+
 
         private void button7_Click(object sender, EventArgs e)
         {
@@ -2002,6 +2558,8 @@ namespace GetResultFormulas
                 Range ped = worksheet.Rows.Cells[108, 2];
                 Range leaktest = worksheet.Rows.Cells[109, 2];
                 Range tubing = worksheet.Rows.Cells[113, 2];
+                Range connections = worksheet.Rows.Cells[131, 2];
+                connections.Value = comboBox24.SelectedItem.ToString();
 
                 Range worktest = worksheet.Rows.Cells[126, 2];
                 if (checkedListBox1.GetItemCheckState(1) == System.Windows.Forms.CheckState.Checked)
@@ -2240,15 +2798,21 @@ namespace GetResultFormulas
                 Range yoke = worksheet.Rows.Cells[115, 2];
                 yoke.Value = comboBox23.SelectedItem.ToString();
 
+                button8.Visible = true;
+                button6.Visible = true;
             }
 
 
             catch (Exception ee)
             {
-
                 _ = MessageBox.Show("One or more Options not selected " +
-                    "\n Eg: Confirm that Actuator Type is selected"/*ee.ToString()*/,"Selection Error",MessageBoxButtons.OK,MessageBoxIcon.Hand);
+               "\n Eg: Confirm that Actuator Type is selected"/*ee.ToString()*/, "Selection Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                button8.Visible = false;
+                button6.Visible = false;
+
             }
+
+
             finally
             {
 
@@ -2257,8 +2821,10 @@ namespace GetResultFormulas
                 excel2.Application.Quit();
                 excel2.Quit();
 
+
                 /// = MessageBox.Show("You are done");
             }
+
 
             //Marshal.ReleaseComObject(worksheet);
             //excel2.DisplayAlerts = false;
@@ -2363,7 +2929,7 @@ namespace GetResultFormulas
             dialog.FileName = "sizing";
 
             if (dialog.ShowDialog() == DialogResult.OK)
-            {                
+            {
                 FormSerialisor.Serialise(this, dialog.FileName + "");
             }
 
@@ -2381,28 +2947,35 @@ namespace GetResultFormulas
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
-            
+
         }
-        
-        
+
+
 
         private void comboBox9_SelectedIndexChanged(object sender, EventArgs e)
         {
             Variables.power = int.Parse(comboBox9.SelectedItem.ToString());
-            if (cmbState.SelectedIndex==0)
+            if (cmbState.SelectedIndex == 0)
             {
-                
-                textBox10.Text = Math.Round(double.Parse(((278*Variables.m3h)/(Math.Pow(Variables.power /2, 2)*3.14)).ToString()),2).ToString();
+
+                textBox10.Text = Math.Round(double.Parse(((278 * Variables.m3h) / (Math.Pow(Variables.power / 2, 2) * 3.14)).ToString()), 2).ToString();
+                var f = Math.Round(double.Parse(((278 * Variables.flowratemax) / (Math.Pow(Variables.power / 2, 2) * 3.14)).ToString()), 2).ToString();
+                txtVVNF.Text = Math.Round(double.Parse(((278 * Variables.flowratenorm) / (Math.Pow(Variables.power / 2, 2) * 3.14)).ToString()), 2).ToString();
+                txtVVMinF.Text = Math.Round(double.Parse(((278 * Variables.flowratemin) / (Math.Pow(Variables.power / 2, 2) * 3.14)).ToString()), 4).ToString();
                 //textBox10.Text = Math.Round(double.Parse(((278 * Variables.m3h) / (Math.Pow(Variables.power / 2, 2) * 3.14)).ToString()), 2).ToString();
                 //textBox10.Text = Math.Round(double.Parse(((278 * Variables.m3h) / (Math.Pow(Variables.power / 2, 2) * 3.14)).ToString()), 2).ToString();
 
             }
             else
             {
-                textBox10.Text = Math.Round(double.Parse((((1.296 * Variables.nm3h1) * Variables.kelvin1 / (Math.Pow(Variables.power, 2) * (Variables.p2)) / 340).ToString())),3).ToString();
-                //textBox10.Text = Math.Round(double.Parse((((1.296 * Variables.nm3h1) * Variables.kelvin1 / (Math.Pow(Variables.power, 2) * (Variables.p2)) / 340).ToString())), 3).ToString();
-                //textBox10.Text = Math.Round(double.Parse((((1.296 * Variables.nm3h1) * Variables.kelvin1 / (Math.Pow(Variables.power, 2) * (Variables.p2)) / 340).ToString())), 3).ToString();
+                textBox10.Text = Math.Round(double.Parse((((1.296 * Variables.nm3h1) * Variables.kelvin1 / (Math.Pow(Variables.power, 2) * (Variables.p2)) / 340).ToString())), 3).ToString();
+                txtVVNF.Text = Math.Round(double.Parse((((1.296 * Variables.flowratenorm) * (Variables.normalt + 273.15) / (Math.Pow(Variables.power, 2) * (Variables.normalp2)) / 340).ToString())), 3).ToString();
+                txtVVMinF.Text = Math.Round(double.Parse((((1.296 * Variables.flowratemin) * (Variables.minimumt + 273.15) / (Math.Pow(Variables.power, 2) * (Variables.minimump2)) / 340).ToString())), 4).ToString();
             }
+
+            //var LpAmax = Math.Log10 Kv+ 18 Math.Log10(p1 - pv) - 5 Math.Log10 ρ+292 * (Xf - zy) ^ 0,75 - (268 + 38 * zy) * (Xf - zy) ^ 0,935 + 40 + ΔLf;
+
+
             //try
             //{
             //    comboBox11.SelectedItem = (textBox2.Text);
@@ -2425,11 +2998,11 @@ namespace GetResultFormulas
             double[] collection125 = { 51.26, 79.97, 115.5, 176, 293.7 };
             double[] collection150 = { 79.97, 115.5, 176, 293.7, 404.8 };
             double[] collection200 = { 115.5, 176, 293.7, 404.8, 711.7 };
-            
+
             int cvs = int.Parse(comboBox9.SelectedItem.ToString());
             switch (cvs)
             {
-                
+
                 case 15:
                     comboBox11.Items.Clear();
                     foreach (double item in collection)
@@ -2437,9 +3010,9 @@ namespace GetResultFormulas
                         if (item >= double.Parse(textBox2.Text))
                         {
                             comboBox11.Items.Add(item);
-                        } 
+                        }
                     }
-                    
+
                     //comboBox11.Items.Add(0.059);
                     //comboBox11.Items.Add(0.165);
                     //comboBox11.Items.Add(0.33);
@@ -2453,11 +3026,11 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(3.3);
                     //comboBox11.Items.Add(4.95);
 
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 20:
                     comboBox11.Items.Clear();
-                    
+
                     foreach (double item in collection20)
                     {
                         if (item >= double.Parse(textBox2.Text))
@@ -2478,7 +3051,7 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(3.3);
                     //comboBox11.Items.Add(4.95);
                     //comboBox11.Items.Add(6.93);
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 25:
                     comboBox11.Items.Clear();
@@ -2521,7 +3094,7 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(12.1);
                     //comboBox11.Items.Add(19.8);
 
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 40:
                     comboBox11.Items.Clear();
@@ -2537,7 +3110,7 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(12.1);
                     //comboBox11.Items.Add(19.8);
                     //comboBox11.Items.Add(33);
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 50:
                     comboBox11.Items.Clear();
@@ -2554,7 +3127,7 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(19.8);
                     //comboBox11.Items.Add(33);
                     //comboBox11.Items.Add(51.26);
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 65:
                     comboBox11.Items.Clear();
@@ -2570,7 +3143,7 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(33);
                     //comboBox11.Items.Add(51.26);
                     //comboBox11.Items.Add(79.97);
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 80:
                     comboBox11.Items.Clear();
@@ -2604,7 +3177,7 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(79.97);
                     //comboBox11.Items.Add(115.5);
                     //comboBox11.Items.Add(176);
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 125:
                     comboBox11.Items.Clear();
@@ -2620,7 +3193,7 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(115.5);
                     //comboBox11.Items.Add(176);
                     //comboBox11.Items.Add(293.7);
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 150:
                     comboBox11.Items.Clear();
@@ -2636,7 +3209,7 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(176);
                     //comboBox11.Items.Add(293.7);
                     //comboBox11.Items.Add(404.8);
-                    comboBox11.SelectedItem = double.Parse(textBox2.Text); 
+                    comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
                 case 200:
                     comboBox11.Items.Clear();
@@ -2654,98 +3227,72 @@ namespace GetResultFormulas
                     //comboBox11.Items.Add(711.7);
                     comboBox11.SelectedItem = double.Parse(textBox2.Text);
                     break;
-            
+
             }
-            
+
 
         }
 
 
         private void comboBox10_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //if (comboBox10.SelectedItem="PN 16")
-            //{
-            //    comboBox24.Items.Clear();
-            //    comboBox24.Items.Add("");
 
-            //}
-            string pn = comboBox10.SelectedItem.ToString();
-            switch (pn)
+
+
+            double temp;
+
+            if (cmbITUnit.SelectedIndex == 0)
+            {
+                //fromfarenh
+                temp = (double.Parse(txtITMaxF.Text) - 32) * 5 / 9;
+            }
+            else if (cmbITUnit.SelectedIndex == 1)
+            {
+                //from degrees
+                temp = double.Parse(txtITMaxF.Text);
+            }
+            else
+            {
+
+                //from kelvin
+                temp = double.Parse(txtITMaxF.Text) - 273.15;
+            }
+
+
+
+
+            string material = comboBox10.SelectedItem.ToString();
+
+            switch (material)
             {
                 case "PN16":
-                    comboBox24.Items.Clear();
-                    comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
-                    break;
                 case "PN25":
-                    comboBox24.Items.Clear();
-                    //comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
-                    comboBox24.Items.Add("ASME B16.5-150 RF");
-                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                case "CL150":
+                    //Add only if item in the LIST suitable:
+                    comboBox25.Items.Clear();
+                    var candidates = new[] { "ASTM A395/DIN 0.7043", "ASTM A216/DIN 1.0619", "ASTM A351/DIN 1.4408" };
+                    foreach (var c in candidates)
+                        if (Variables.suitable.Contains(c))
 
-                    
-                    break;
-                case "#150":
-                    comboBox24.Items.Clear();
-                    comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
-                    comboBox24.Items.Add("ASME B16.5-150 RF");
-
+                            comboBox25.Items.Add(c);
                     break;
                 case "PN40":
-                    comboBox24.Items.Clear();
-                    comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
-                    comboBox24.Items.Add("ASME B16.5-150 RF");
-                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
-                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
-
-                    break;
                 case "PN63":
-                    comboBox24.Items.Clear();
-                    comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
-                    comboBox24.Items.Add("ASME B16.5-150 RF");
-                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
-                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
-                    comboBox24.Items.Add("ASME B16.5-300 RF");
-
-                    break;
                 case "PN100":
-                    comboBox24.Items.Clear();
-                    comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
-                    comboBox24.Items.Add("ASME B16.5-150 RF");
-                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
-                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
-                    comboBox24.Items.Add("ASME B16.5-300 RF");
-                    comboBox24.Items.Add("EN 10226 BSPT");
-                    comboBox24.Items.Add("ASME B1.20.1 NPT");
-                    comboBox24.Items.Add("SW ASME B16.11");
-                    comboBox24.Items.Add("BW ASME B16.25");
-
+                case "CL300":
+                case "CL600":
+                    //Add only If in the List
+                    comboBox25.Items.Clear();
+                    var candidates2 = new[] { "ASTM A216/DIN 1.0619", "ASTM A351/DIN 1.4408" };
+                    foreach (var c in candidates2)
+                        if (Variables.suitable.Contains(c))
+                            comboBox25.Items.Add(c);
                     break;
-                case "#300":
-                    comboBox24.Items.Clear();
-                    comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
-                    comboBox24.Items.Add("ASME B16.5-150 RF");
-                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
-                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
-                    comboBox24.Items.Add("ASME B16.5-300 RF");
-                    break;
-                case "#600":
-                    comboBox24.Items.Clear();
-                    comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
-                    comboBox24.Items.Add("ASME B16.5-150 RF");
-                    comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
-                    comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
-                    comboBox24.Items.Add("ASME B16.5-300 RF");
-                    comboBox24.Items.Add("EN 10226 BSPT");
-                    comboBox24.Items.Add("ASME B1.20.1 NPT");
-                    comboBox24.Items.Add("SW ASME B16.11");
-                    comboBox24.Items.Add("BW ASME B16.25");
-                    break;
-
-
-
-
             }
-            comboBox24.SelectedIndex = 0;
+            comboBox25.SelectedIndex = -1;
+            comboBox24.SelectedIndex = -1;
+
+
         }
 
         private void txtAPSMaxF_TextChanged(object sender, EventArgs e)
@@ -2772,81 +3319,166 @@ namespace GetResultFormulas
                 {
                     textBox3.Text = ("Too high. Low noise trim 1/2 to be selected");
                     textBox3.BackColor = Color.Red;
-                    
+
                     richTextBox1.Select(richTextBox1.TextLength, 0);
                     richTextBox1.SelectionColor = Color.Red;
                     richTextBox1.AppendText("\nNOISE TOO HIGH. SELECT TRIM TO LOWER");
                     //richTextBox1.Text=("\nNOISE TOO HIGH.SELECT TRIM TO LOWER");
                 }
             }
-            
+
 
 
         }
         private void cmbTType_SelectedIndexChanged(object sender, EventArgs e)
         {
-
-            if (cmbTType.SelectedIndex == 1)
+            if (textBox3.BackColor == Color.Green && textBox13.BackColor == Color.Green && textBox11.BackColor == Color.Green)
             {
-
-                txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound - 15).ToString()),2).ToString();
-                txtAPSNF.Text = (Variables.soundNorm - 15).ToString();
-                txtAPSMinF.Text = (Variables.soundMin - 15).ToString();
-                textBox14.Text = (Variables.sigma + 0.2).ToString();
-
-
-
-            }
-            else if (cmbTType.SelectedIndex == 2)
-            {
-                txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound - 25).ToString()), 2).ToString();
-                txtAPSNF.Text = (Variables.soundNorm - 25).ToString();
-                txtAPSMinF.Text = (Variables.soundMin - 25).ToString();
-                textBox14.Text = (Variables.sigma + 0.3).ToString();
-            }
-            else
-            {
-                txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound).ToString()), 2).ToString();
-                txtAPSNF.Text = (Variables.soundNorm).ToString();
-                txtAPSMinF.Text = (Variables.soundMin).ToString();
+                txtAPSMaxF.Text = Math.Round(Variables.sound, 2).ToString();
+                txtAPSNF.Text = Math.Round(Variables.soundNorm, 2).ToString();
+                txtAPSMinF.Text = Math.Round(Variables.soundMin, 2).ToString();
                 textBox14.Text = Variables.sigma.ToString();
 
-
-            }
-            if (cmbTType.SelectedItem.ToString() == "Standard Parabolic")
-            {
                 comboBox19.Items.Clear();
                 comboBox19.Items.Add("316L SS");
-            }
-            else if (cmbTType.SelectedItem.ToString() == "Anticav 1")
-            {
-                comboBox19.Items.Clear();
-                comboBox19.Items.Add("316L SS + Stellite");
-            }
-            else if (cmbTType.SelectedItem.ToString() == "Anticav 2")
-            {
-                comboBox19.Items.Clear();
-                comboBox19.Items.Add("316L SS + Stellite");
-            }
-            else if (cmbTType.SelectedItem.ToString() == "low noise 1")
-            {
-                comboBox19.Items.Clear();
-                comboBox19.Items.Add("316L SS + Stellite");
-            }
-            else if (cmbTType.SelectedItem.ToString() == "Low noise 2")
-            {
-                comboBox19.Items.Clear();
-                comboBox19.Items.Add("316L SS + Stellite");
+                comboBox19.Items.Add("316L SS + STELLITE");
+                comboBox19.Items.Add("316L SS + PTFE(WHITE)");
+                comboBox19.Items.Add("316L SS + RPTFE");
+                comboBox19.Items.Add("316L SS + PEEK");
             }
             else
             {
-                comboBox19.Items.Clear();
-                comboBox19.Items.Add("316L SS + Stellite");
+                if (cmbTType.SelectedItem.ToString() == "Anticav 1" || cmbTType.SelectedItem.ToString() == "low noise 1")
+                {
+
+                    txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound - 15).ToString()), 2).ToString();
+                    txtAPSNF.Text = (Variables.soundNorm - 15).ToString();
+                    txtAPSMinF.Text = (Variables.soundMin - 15).ToString();
+                    textBox14.Text = (Variables.sigma + 0.2).ToString();
+
+                    comboBox19.Items.Clear();
+                    comboBox19.Items.Add("316L SS + STELLITE");
+
+
+                }
+                else if (cmbTType.SelectedItem.ToString() == "Anticav 2" || cmbTType.SelectedItem.ToString() == "Low noise 2")
+                {
+                    txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound - 25).ToString()), 2).ToString();
+                    txtAPSNF.Text = (Variables.soundNorm - 25).ToString();
+                    txtAPSMinF.Text = (Variables.soundMin - 25).ToString();
+                    textBox14.Text = (Variables.sigma + 0.3).ToString();
+
+                    comboBox19.Items.Clear();
+                    comboBox19.Items.Add("316L SS + STELLITE");
+                }
+                else
+                {
+                    txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound).ToString()), 2).ToString();
+                    txtAPSNF.Text = (Variables.soundNorm).ToString();
+                    txtAPSMinF.Text = (Variables.soundMin).ToString();
+                    textBox14.Text = Variables.sigma.ToString();
+                    comboBox19.Items.Clear();
+                    comboBox19.Items.Add("316L SS");
+
+
+                }
+                //if (cmbTType.SelectedItem.ToString() == "Standard Parabolic")
+                //{
+                //    comboBox19.Items.Clear();
+                //    comboBox19.Items.Add("316L SS");
+                //}
+                //else if (cmbTType.SelectedItem.ToString() == "Anticav 1")
+                //{
+                //    comboBox19.Items.Clear();
+                //    comboBox19.Items.Add("316L SS + Stellite");
+                //}
+                //else if (cmbTType.SelectedItem.ToString() == "Anticav 2")
+                //{
+                //    comboBox19.Items.Clear();
+                //    comboBox19.Items.Add("316L SS + Stellite");
+                //}
+                //else if (cmbTType.SelectedItem.ToString() == "low noise 1")
+                //{
+                //    comboBox19.Items.Clear();
+                //    comboBox19.Items.Add("316L SS + Stellite");
+                //}
+                //else if (cmbTType.SelectedItem.ToString() == "Low noise 2")
+                //{
+                //    comboBox19.Items.Clear();
+                //    comboBox19.Items.Add("316L SS + Stellite");
+                //}
+                //else
+                //{
+                //    comboBox19.Items.Clear();
+                //    comboBox19.Items.Add("316L SS + Stellite");
+                //}
+                comboBox19.SelectedIndex = 0;
+
+
             }
-            comboBox19.SelectedIndex = 0;
-
-
         }
+
+        //    if (cmbTType.SelectedIndex == 1)
+        //    {
+
+        //        txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound - 15).ToString()),2).ToString();
+        //        txtAPSNF.Text = (Variables.soundNorm - 15).ToString();
+        //        txtAPSMinF.Text = (Variables.soundMin - 15).ToString();
+        //        textBox14.Text = (Variables.sigma + 0.2).ToString();
+
+
+
+        //    }
+        //    else if (cmbTType.SelectedIndex == 2)
+        //    {
+        //        txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound - 25).ToString()), 2).ToString();
+        //        txtAPSNF.Text = (Variables.soundNorm - 25).ToString();
+        //        txtAPSMinF.Text = (Variables.soundMin - 25).ToString();
+        //        textBox14.Text = (Variables.sigma + 0.3).ToString();
+        //    }
+        //    else
+        //    {
+        //        txtAPSMaxF.Text = Math.Round(double.Parse((Variables.sound).ToString()), 2).ToString();
+        //        txtAPSNF.Text = (Variables.soundNorm).ToString();
+        //        txtAPSMinF.Text = (Variables.soundMin).ToString();
+        //        textBox14.Text = Variables.sigma.ToString();
+
+
+        //    }
+        //    if (cmbTType.SelectedItem.ToString() == "Standard Parabolic")
+        //    {
+        //        comboBox19.Items.Clear();
+        //        comboBox19.Items.Add("316L SS");
+        //    }
+        //    else if (cmbTType.SelectedItem.ToString() == "Anticav 1")
+        //    {
+        //        comboBox19.Items.Clear();
+        //        comboBox19.Items.Add("316L SS + Stellite");
+        //    }
+        //    else if (cmbTType.SelectedItem.ToString() == "Anticav 2")
+        //    {
+        //        comboBox19.Items.Clear();
+        //        comboBox19.Items.Add("316L SS + Stellite");
+        //    }
+        //    else if (cmbTType.SelectedItem.ToString() == "low noise 1")
+        //    {
+        //        comboBox19.Items.Clear();
+        //        comboBox19.Items.Add("316L SS + Stellite");
+        //    }
+        //    else if (cmbTType.SelectedItem.ToString() == "Low noise 2")
+        //    {
+        //        comboBox19.Items.Clear();
+        //        comboBox19.Items.Add("316L SS + Stellite");
+        //    }
+        //    else
+        //    {
+        //        comboBox19.Items.Clear();
+        //        comboBox19.Items.Add("316L SS + Stellite");
+        //    }
+        //    comboBox19.SelectedIndex = 0;
+
+
+        //}
 
 
         private void txtRFCMaxF_TextChanged(object sender, EventArgs e)
@@ -2862,7 +3494,7 @@ namespace GetResultFormulas
 
         private void checkBox3_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBox3.Checked==false)
+            if (checkBox3.Checked == false)
             {
                 groupBox1.Visible = false;
                 groupBox14.Visible = false;
@@ -2896,18 +3528,18 @@ namespace GetResultFormulas
 
         }
 
-        
+
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void checkBox5_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBox5.Checked==true)
+            if (checkBox5.Checked == true)
             {
-                txtSWMWNF.ReadOnly=false;
+                txtSWMWNF.ReadOnly = false;
                 txtVSHRNF.ReadOnly = false;
             }
             else
@@ -2924,7 +3556,7 @@ namespace GetResultFormulas
 
         private void cmbIPUnit1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cmbIPUnit1.SelectedIndex==1)
+            if (cmbIPUnit1.SelectedIndex == 1)
             {
                 cmbIPUnit2.Visible = true;
             }
@@ -2955,6 +3587,7 @@ namespace GetResultFormulas
         {
             //comboBox15.SelectedIndex = comboBox11.SelectedIndex;
             //cmbTSize.Text = comboBox15.SelectedItem.ToString();
+
 
             double seatt = double.Parse(comboBox11.SelectedItem.ToString());
             switch (seatt)
@@ -3017,9 +3650,141 @@ namespace GetResultFormulas
                 case 711.7:
                     cmbTSize.Text = "201";
                     break;
-                    
+
 
             }
+            if (cmbState.SelectedIndex == 0)
+            {
+                //ANTICAV TRIMS FOR LIQUIDS
+                if (double.Parse(comboBox11.SelectedItem.ToString()) < 4.95)
+                {
+                    //cavitation levels 
+                    if (textBox11.BackColor == Color.Green)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Microflow");
+
+                    }
+                    else
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Microflow");
+                        cmbTType.Items.Add("Anticav 1");
+                        cmbTType.Items.Add("Anticav 2");
+
+                    }
+                    //NOISE LEVELS
+                    if (textBox3.BackColor == Color.Green)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Microflow");
+
+                    }
+                    else
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Microflow");
+                        cmbTType.Items.Add("low noise 1");
+                        cmbTType.Items.Add("Low noise 2");
+
+                    }
+
+
+                    //characteristics microflow
+                    cmbTC.Items.Clear();
+
+                    cmbTC.Items.Add("On-Off");
+
+                }
+                else
+                {
+                    if (textBox3.BackColor == Color.Green && textBox11.BackColor == Color.Green)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Standard Parabolic");
+                    }
+                    if (textBox11.BackColor != Color.Green)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Standard Parabolic");
+                        cmbTType.Items.Add("Anticav 1");
+                        cmbTType.Items.Add("Anticav 2");
+                    }
+                    if (textBox3.BackColor != Color.Green)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Standard Parabolic");
+                        cmbTType.Items.Add("low noise 1");
+                        cmbTType.Items.Add("Low noise 2");
+                    }
+
+
+                    cmbTC.Items.Clear();
+                    cmbTC.Items.Add("Equal percentage");
+                    cmbTC.Items.Add("Linear");
+                    cmbTC.Items.Add("On-Off");
+                    cmbTC.Items.Add("Bi-Linear");
+                    cmbTC.Items.Add("Tri-Linear");
+                    cmbTC.Items.Add("Soecial");
+                }
+            }
+            else
+            {
+                //NOISE TRIM FOR GASES
+                if (double.Parse(comboBox11.SelectedItem.ToString()) < 4.95)
+                {
+                    if (textBox3.BackColor == Color.Green)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Microflow");
+
+                    }
+                    else
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Microflow");
+                        cmbTType.Items.Add("low noise 1");
+                        cmbTType.Items.Add("Low noise 2");
+
+                    }
+
+
+                    //characteristics microflow
+                    cmbTC.Items.Clear();
+
+                    cmbTC.Items.Add("On-Off");
+
+                }
+                else
+                {
+                    if (textBox3.BackColor == Color.Green)
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Standard Parabolic");
+                    }
+                    else
+                    {
+                        cmbTType.Items.Clear();
+                        cmbTType.Items.Add("Standard Parabolic");
+                        cmbTType.Items.Add("low noise 1");
+                        cmbTType.Items.Add("Low noise 2");
+                    }
+
+
+
+                    cmbTC.Items.Clear();
+                    cmbTC.Items.Add("Equal percentage");
+                    cmbTC.Items.Add("Linear");
+                    cmbTC.Items.Add("On-Off");
+                    cmbTC.Items.Add("Bi-Linear");
+                    cmbTC.Items.Add("Tri-Linear");
+                    cmbTC.Items.Add("Soecial");
+                }
+
+
+            }
+            cmbTType.SelectedIndex = 0;
+            cmbTC.SelectedIndex = 0;
         }
 
         private void comboBox16_SelectedIndexChanged(object sender, EventArgs e)
@@ -3033,6 +3798,19 @@ namespace GetResultFormulas
             {
                 checkBox1.Checked = false;
             }
+            //if (comboBox16.SelectedItem.ToString().EndsWith("15)"))
+            //{
+            //    comboBox21.Items.Clear();
+
+            //    comboBox21.Items.Add("Fail Open");
+            //}
+            //else
+            //{
+            //    comboBox21.Items.Clear();
+            //    comboBox21.Items.Add("Fail Close");
+            //    comboBox21.Items.Add("Fail Open");
+            //}
+            //comboBox21.SelectedIndex = 0;
         }
 
         private void comboBox19_SelectedIndexChanged(object sender, EventArgs e)
@@ -3042,15 +3820,34 @@ namespace GetResultFormulas
                 comboBox20.Items.Clear();
                 comboBox20.Items.Add("Metal Class IV");
             }
-            else if (comboBox19.SelectedItem.ToString() == "316L SS + Stellite")
+            else if (comboBox19.SelectedItem.ToString() == "316L SS + STELLITE")
             {
                 comboBox20.Items.Clear();
-                comboBox20.Items.Add("Metal-Hardened Class V");
+                comboBox20.Items.Add("Metal Class IV");
+                //comboBox20.Items.Add("Metal-Hardened Class V");
+            }
+            else if (comboBox19.SelectedItem.ToString() == "316L SS + PTFE(WHITE)")
+            {
+                comboBox20.Items.Clear();
+
+                comboBox20.Items.Add("Metal-Hardened Class VI");
+            }
+            else if (comboBox19.SelectedItem.ToString() == "316L SS + RPTFE")
+            {
+                comboBox20.Items.Clear();
+
+                comboBox20.Items.Add("Metal-Hardened Class VI");
+            }
+            else if (comboBox19.SelectedItem.ToString() == "316L SS + PEEK")
+            {
+                comboBox20.Items.Clear();
+                comboBox20.Items.Add("Metal Class V");
+                comboBox20.Items.Add("Metal-Hardened Class VI");
             }
             else
             {
-                    comboBox20.Items.Clear();
-                    comboBox20.Items.Add("Soft Class VI");
+                comboBox20.Items.Clear();
+                comboBox20.Items.Add("Soft Class VI");
             }
             comboBox20.SelectedIndex = 0;
 
@@ -3074,11 +3871,11 @@ namespace GetResultFormulas
 
         private void textBox14_TextChanged(object sender, EventArgs e)
         {
-            if (double.Parse(textBox14.Text)> 1.5 && double.Parse(textBox14.Text) <= 2.0)
+            if (double.Parse(textBox14.Text) > 1.5 && double.Parse(textBox14.Text) <= 2.0)
             {
                 textBox11.Text = ("Incipient cavitation");
                 textBox11.BackColor = Color.Yellow;
-                
+
 
 
             }
@@ -3092,16 +3889,16 @@ namespace GetResultFormulas
             {
                 textBox11.Text = ("Full cavitation");
                 textBox11.BackColor = Color.Red;
-               
+
             }
             else
             {
                 textBox11.Text = ("No cavitation");
                 textBox11.BackColor = Color.Green;
-                
+
 
             }
-           
+
         }
 
         private void button8_Click(object sender, EventArgs e)
@@ -3127,10 +3924,13 @@ namespace GetResultFormulas
             //added
             process.Dispose();
             process.Close();
+            var pathload = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             try
             {
                 _PrintExcel.Workbook workbook3 = new _PrintExcel.Workbook();
-                workbook3.LoadFromFile(filename + "\\Demo.xlsx");
+
+
+                workbook3.LoadFromFile(pathload + "\\Demo.xlsx");
 
                 _PrintExcel.Worksheet sheet1 = workbook3.Worksheets["printout"];
 
@@ -3156,8 +3956,8 @@ namespace GetResultFormulas
 
                 System.Diagnostics.Process.Start(path + "Sizing Printout.pdf");
 
-                //sheet1.Dispose();
-                //workbook3.Dispose();
+                sheet1.Dispose();
+                workbook3.Dispose();
 
 
                 //workbook3.Application.Quit();
@@ -3173,7 +3973,7 @@ namespace GetResultFormulas
             }
             finally
             {
-                
+
             }
 
 
@@ -3217,7 +4017,7 @@ namespace GetResultFormulas
                 //close all the workbook and excel application handler
                 wbSource.Close();
                 wbDest.Close();
-                //excel.ActiveWorkbook.Save();
+                excel.ActiveWorkbook.Save();
                 excel.DisplayAlerts = false;
                 excel.Quit();
             }
@@ -3237,7 +4037,7 @@ namespace GetResultFormulas
 
         private void checkedListBox1_MouseClick(object sender, MouseEventArgs e)
         {
-          
+
         }
 
         private void comboBox17_SelectedIndexChanged(object sender, EventArgs e)
@@ -3258,16 +4058,26 @@ namespace GetResultFormulas
 
                 }
             }
-            else
-            {
-                comboBox21.Items.Clear();
-                comboBox21.Items.Add("Fail Close");
-                comboBox21.Items.Add("Fail Open");
-            }
-            comboBox21.SelectedIndex = 0;
+            //else
+            //{
+            //    if (comboBox16.SelectedItem.ToString().EndsWith("15)"))
+            //    {
+            //        comboBox21.Items.Clear();
+
+            //        comboBox21.Items.Add("Fail Open");
+            //    }
+            //    else
+            //    {
+            //        comboBox21.Items.Clear();
+            //        comboBox21.Items.Add("Fail Close");
+            //        comboBox21.Items.Add("Fail Open");
+            //    }
+
+            //}
+            //comboBox21.SelectedIndex = 0;
 
         }
-     
+
 
         private void comboBox24_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -3280,7 +4090,7 @@ namespace GetResultFormulas
 
         private void checkedListBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            
+
             if (checkedListBox1.GetItemCheckState(10) == System.Windows.Forms.CheckState.Checked)
             {
                 checkedListBox1.SetItemChecked(9, false);
@@ -3289,7 +4099,7 @@ namespace GetResultFormulas
             {
                 checkedListBox1.SetItemChecked(10, false);
             }
-           
+
         }
 
         [DllImport("user32.DLL", EntryPoint = "ReleaseCapture")]
@@ -3306,6 +4116,318 @@ namespace GetResultFormulas
         private void button10_Click(object sender, EventArgs e)
         {
             global::System.Windows.Forms.Application.Exit();
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            WindowState = FormWindowState.Minimized;
+        }
+
+        private void comboBox25_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string pn = comboBox10.SelectedItem.ToString();
+            string mattt = comboBox25.SelectedItem.ToString();
+            if (mattt == "ASTM A395/DIN 0.7043")
+            {
+                switch (pn)
+                {
+                    case "PN16":
+                        comboBox24.Items.Clear();
+
+                        comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        break;
+
+                    case "PN25":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                        }
+
+
+                        break;
+                    case "CL150":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+
+                        break;
+                    case "PN40":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                        }
+                        break;
+
+                    case "PN63":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                        }
+
+                        comboBox24.Items.Add("EN 10226 BSPT");
+                        comboBox24.Items.Add("ASME B1.20.1 NPT");
+
+                        break;
+                    case "PN100":
+                        comboBox24.Items.Clear();
+
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                        }
+
+                        comboBox24.Items.Add("EN 10226 BSPT");
+                        comboBox24.Items.Add("ASME B1.20.1 NPT");
+
+                        break;
+                    case "CL300":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                        }
+
+                        comboBox24.Items.Add("EN 10226 BSPT");
+                        comboBox24.Items.Add("ASME B1.20.1 NPT");
+                        break;
+
+                    case "CL600":
+                        comboBox24.Items.Clear();
+
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                        }
+
+                        comboBox24.Items.Add("EN 10226 BSPT");
+                        comboBox24.Items.Add("ASME B1.20.1 NPT");
+                        break;
+                }
+            }
+            else
+            {
+                switch (pn)
+                {
+                    case "PN16":
+                        comboBox24.Items.Clear();
+
+                        comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+
+
+
+                        break;
+                    case "PN25":
+                        comboBox24.Items.Clear();
+                        comboBox24.Items.Add("FLG EN1092-1 PN25 B1");
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+
+
+
+
+
+                        break;
+                    case "CL150":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        comboBox24.Items.Add("ASME B16.5-150 RF");
+
+                        break;
+                    case "PN40":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1"); ;
+                        }
+
+                        comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+
+                        break;
+
+                    case "PN63":
+                        comboBox24.Items.Clear();
+
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1"); ;
+                        }
+                        if (comboBox10.Items.Contains("PN40"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+                        }
+                        if (comboBox10.Items.Contains("CL300"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-300 RF");
+                        }
+                        break;
+
+                    case "PN100":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1"); ;
+                        }
+                        if (comboBox10.Items.Contains("PN40"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+                        }
+                        if (comboBox10.Items.Contains("CL300"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-300 RF");
+                        }
+
+                        comboBox24.Items.Add("EN 10226 BSPT");
+                        comboBox24.Items.Add("ASME B1.20.1 NPT");
+                        comboBox24.Items.Add("SW ASME B16.11");
+                        comboBox24.Items.Add("BW ASME B16.25");
+
+                        break;
+                    case "CL300":
+                        comboBox24.Items.Clear();
+
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1"); ;
+                        }
+                        if (comboBox10.Items.Contains("PN40"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+                        }
+                        if (comboBox10.Items.Contains("CL300"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-300 RF");
+                        }
+                        break;
+                    case "CL600":
+                        comboBox24.Items.Clear();
+                        if (comboBox10.Items.Contains("CL150"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-150 RF");
+                        }
+                        if (comboBox10.Items.Contains("PN16"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN16 B1");
+                        }
+                        if (comboBox10.Items.Contains("PN25"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN25 B1"); ;
+                        }
+                        if (comboBox10.Items.Contains("PN40"))
+                        {
+                            comboBox24.Items.Add("FLG EN1092-1 PN40 B1");
+                        }
+                        if (comboBox10.Items.Contains("CL300"))
+                        {
+                            comboBox24.Items.Add("ASME B16.5-300 RF");
+                        }
+
+                        comboBox24.Items.Add("EN 10226 BSPT");
+                        comboBox24.Items.Add("ASME B1.20.1 NPT");
+                        comboBox24.Items.Add("SW ASME B16.11");
+                        comboBox24.Items.Add("BW ASME B16.25");
+                        break;
+                }
+
+            }
+            comboBox24.SelectedIndex = -1;
         }
     }
 
