@@ -2758,9 +2758,9 @@ namespace AID2
             this.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.ClientSize = new System.Drawing.Size(1387, 567);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox10);
+            this.Controls.Add(this.groupBox5);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
