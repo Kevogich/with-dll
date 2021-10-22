@@ -207,6 +207,11 @@ namespace GetResultFormulas
                     if (distinct.Add(value))
                         comboBox9.Items.Add(value);
                 }
+                string value = (cell.Value2).ToString();
+
+                    if (distinct.Add(value))
+                        comboBox10.Items.Add(value);
+                
             try
             {
 
