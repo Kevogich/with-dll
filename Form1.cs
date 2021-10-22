@@ -195,6 +195,18 @@ namespace GetResultFormulas
             _Excel.Worksheet worksheet = workbook.Worksheets["SELECTION"] as _Excel.Worksheet;
             if (worksheet == null)
                 return;
+                
+                comboBox9.Items.Clear();
+                HashSet<string> distinct = new HashSet<string>();
+
+
+                foreach (_Excel.Range cell in range.Cells)
+                {
+                    string value = (cell.Value2).ToString();
+
+                    if (distinct.Add(value))
+                        comboBox9.Items.Add(value);
+                }
             try
             {
 
