@@ -15,6 +15,17 @@ namespace AID2
 {
     public partial class Form2 : Form //MaterialForm
     {
+        comboBox9.Items.Clear();
+                HashSet<string> distinct = new HashSet<string>();
+
+
+                foreach (_Excel.Range cell in range.Cells)
+                {
+                    string value = (cell.Value2).ToString();
+
+                    if (distinct.Add(value))
+                        comboBox9.Items.Add(value);
+                }
         public Form2()
         {
             InitializeComponent();
