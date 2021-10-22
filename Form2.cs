@@ -94,6 +94,7 @@ namespace AID2
             FormPrincipal formprincipal = new FormPrincipal();
             formprincipal.ShowDialog();
             this.Close();
+            this.Close();
         }
     }
 }
