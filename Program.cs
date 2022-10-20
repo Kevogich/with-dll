@@ -10,7 +10,7 @@ namespace AID2
     static class Program
     {
         /// <summary>
-        /// The main entry point for the application.
+        /// The main entry point for the application.Hide unhide forms 
         /// </summary>
         [STAThread]
         static void Main()
