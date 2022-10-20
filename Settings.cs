@@ -5,6 +5,7 @@
     //  The SettingChanging event is raised before a setting's value is changed.
     //  The PropertyChanged event is raised after a setting's value is changed.
     //  The SettingsLoaded event is raised after the setting values are loaded.
+    // any other additional settings 
     //  The SettingsSaving event is raised before the setting values are saved.
     internal sealed partial class Settings {
         
