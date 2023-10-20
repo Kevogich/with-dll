@@ -70,7 +70,10 @@ namespace GetResultFormulas
             cmbFluid.Items.Add("WATER");
             cmbFluid.Items.Add("Other :");
             cmbFluid.Items.Add("2-Phased Flow :");
-
+            cmbState.Items.Add("Liquid");
+            cmbState.Items.Add("Gas");
+            cmbState.Items.Add("Steam Saturated");
+            cmbState.Items.Add("Steam Superheated");
             cmbState.Items.Add("Liquid");
             cmbState.Items.Add("Gas");
             cmbState.Items.Add("Steam Saturated");
