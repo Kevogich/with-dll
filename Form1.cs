@@ -74,10 +74,7 @@ namespace GetResultFormulas
             cmbState.Items.Add("Gas");
             cmbState.Items.Add("Steam Saturated");
             cmbState.Items.Add("Steam Superheated");
-            cmbState.Items.Add("Liquid");
-            cmbState.Items.Add("Gas");
-            cmbState.Items.Add("Steam Saturated");
-            cmbState.Items.Add("Steam Superheated");
+        
 
 
 
